@@ -1,0 +1,25 @@
+[ 2016-07-07T14:19:31+08:00 ] 127.0.0.1 /
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+INFO: [ app_init ] --END-- [ RunTime:0.003000s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.002000s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.002000s ]
+NOTIC: [8] Undefined index: client_id D:\31day\web\Application\Home\Controller\IndexController.class.php 第 8 行.
+NOTIC: [8] Undefined index: api_token D:\31day\web\Application\Home\Controller\IndexController.class.php 第 9 行.
+NOTIC: [8] Undefined index: user_token D:\31day\web\Application\Home\Controller\IndexController.class.php 第 10 行.
+NOTIC: [8] Undefined index: mod D:\31day\web\Application\Home\Controller\IndexController.class.php 第 16 行.
+NOTIC: [8] Undefined index: ctr D:\31day\web\Application\Home\Controller\IndexController.class.php 第 17 行.
+NOTIC: [8] Undefined index: act D:\31day\web\Application\Home\Controller\IndexController.class.php 第 18 行.
+SQL: SHOW COLUMNS FROM `pre_user` [ RunTime:0.016001s ]
+SQL: SELECT `id`,`cid`,`groupid`,`username`,`nickname`,`cellphone`,`work` FROM `pre_user` WHERE ( id=1 and status = 10  ) LIMIT 1   [ RunTime:0.015000s ]
+
+[ 2016-07-07T14:19:53+08:00 ] 127.0.0.1 /index.php/Home/HX/HX
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000000s ]
+INFO: [ app_init ] --END-- [ RunTime:0.001000s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.001000s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.001000s ]
+ERR: 参数错误或者未定义:options
+
