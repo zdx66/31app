@@ -56,6 +56,7 @@ class IndexController extends RestController
             'Content-Type: application/json',
             'Authorization: Bearer ' . $this->token
         );
+        echo json_encode("注册成功");
         return $this->curl($url, $data, $header, "POST");
     }
     /*
