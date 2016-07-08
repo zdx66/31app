@@ -43,20 +43,32 @@ class IndexController extends RestController
         }
         $time = time();
         $id = $user->add(array('username'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'created_at'=>$time));
-        $userData->add(array('user_id'=>$id));
-        $userProfile->add(array('user_id'=>$id));
-        //dd
+        $usr = $userData->add(array('user_id'=>$id));
+        $usrp = $userProfile->add(array('user_id'=>$id));
         $url = C('URL') . "/users";
-        $data = array(
-            'username' => $username,
-            'password' => $password,
-            'nickname' => $nickname
-        );
-        $header = array(
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->token
-        );
-        echo json_encode("注册成功");
+        if($id && $usr && $usrp){ 
+            $data = array(
+                'username' => $username,
+                'password' => $password,
+                'nickname' => $nickname,
+                'code'     => '200'
+            );
+            $header = array(
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->token
+            );
+           
+        }else{
+            $data = array(
+                'code'      => '201',
+            );
+             $header = array(
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->token
+            );
+        }
+        $str = array('data' => $data,'header'=>$header);
+        echo json_encode($str);
         return $this->curl($url, $data, $header, "POST");
     }
     /*
