@@ -1,8 +1,6 @@
-<IfModule mod_rewrite.c>
-  Options +FollowSymlinks
-  RewriteEngine On
-
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteRule ^(.*)$ index.php/$1 [QSA,PT,L]
-</IfModule>
+RewriteEngine on
+# If a directory or a file exists, use it directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# Otherwise forward it to index.php
+RewriteRule . index.php
