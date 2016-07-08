@@ -45,7 +45,7 @@ class IndexController extends RestController
         $id = $user->add(array('username'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'created_at'=>$time));
         $userData->add(array('user_id'=>$id));
         $userProfile->add(array('user_id'=>$id));
-        
+        //dd
         $url = C('URL') . "/users";
         $data = array(
             'username' => $username,
