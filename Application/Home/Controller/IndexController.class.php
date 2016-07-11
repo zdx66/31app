@@ -22,16 +22,19 @@ class IndexController extends RestController
      */
     function hx_register()
     { 
-        $data = $_POST;
+        /*$data = $_POST;
         $data .= json_decode($data);
         $file = 'error_log.txt';
         $data .= date('Y-m-d h:i:s',time()).'/r/n';
         if(file_put_contents($file, $data,FILE_APPEND)){
             echo "写入成功";
-        }
+            dump($data);
+        }*/
         
-        $name = json_decode($_POST['username'],true);
-        $pwd = json_decode($_POST['password'],true);
+        //$name = json_decode($_POST['username'],true);
+       // $pwd = json_decode($_POST['password'],true);
+        $name = $_POST['username'];
+        $pwd = $_POST['password'];
         if($name == null ){
            $result =  json_encode($_POST);
         }
@@ -73,10 +76,7 @@ class IndexController extends RestController
             $data = array(
                 'code'      => '201',
             );
-             $header = array(
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->token
-            );
+            
         }
         $str = array('data' => $data,'header'=>$header);
         echo json_encode($str);
@@ -85,7 +85,13 @@ class IndexController extends RestController
     
     //用户登录
     public function hx_login(){
-        
+        $data = $_POST;
+        $data .= json_decode($data);
+        $file = 'error_log.txt';
+        $data .= date('Y-m-d h:i:s',time()).'/r/n';
+        if(file_put_contents($file, $data,FILE_APPEND)){
+            echo "写入成功";
+        }
     }
     
     //用户退出登录
