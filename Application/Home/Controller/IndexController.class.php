@@ -22,9 +22,20 @@ class IndexController extends RestController
      */
     function hx_register()
     { 
+        $data = $_POST;
+        $data .= json_decode($data);
+        $file = 'error_log.txt';
+        $data .= date('Y-m-d h:i:s',time()).'/r/n';
+        if(file_put_contents($file, $data,FILE_APPEND)){
+            echo "写入成功";
+        }
         
         $name = json_decode($_POST['username'],true);
         $pwd = json_decode($_POST['password'],true);
+        if($name == null ){
+           $result =  json_encode($_POST);
+        }
+        
         $username = $name['username'];
         $password = md5(md5($pwd['password']));
         $nickname = $username;
@@ -42,7 +53,7 @@ class IndexController extends RestController
             exit(json_encode($result));
         }
         $time = time();
-        $id = $user->add(array('username'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'created_at'=>$time));
+        $id = $user->add(array('username'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'created_at'=>$time,'status'=>10));
         $usr = $userData->add(array('user_id'=>$id));
         $usrp = $userProfile->add(array('user_id'=>$id));
         $url = C('URL') . "/users";
@@ -70,6 +81,16 @@ class IndexController extends RestController
         $str = array('data' => $data,'header'=>$header);
         echo json_encode($str);
         return $this->curl($url, $data, $header, "POST");
+    }
+    
+    //用户登录
+    public function hx_login(){
+        
+    }
+    
+    //用户退出登录
+    public function hx_logout(){
+        
     }
     /*
      * 给IM用户的添加好友 $owner_username, $friend_username
