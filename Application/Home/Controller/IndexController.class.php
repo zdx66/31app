@@ -65,18 +65,15 @@ class IndexController extends RestController
                 'username' => $username,
                 'password' => $password,
                 'nickname' => $nickname,
-                'code'     => '200'
             );
+            $code = '200';
             $header = array(
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $this->token
             );
            
         }else{
-            $data = array(
-                'code'      => '201',
-            );
-            
+                $code ='201';
         }
         $str = array('data' => $data,'header'=>$header);
         echo json_encode($str);
