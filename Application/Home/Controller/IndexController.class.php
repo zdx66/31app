@@ -71,6 +71,7 @@ class IndexController extends RestController
         }
         $str = array('data' => $data,'header'=>$header,'code'=>$code);
         echo json_encode($str);
+
         return $this->curl($url, $data, $header, "POST");
     }
     /*
@@ -191,26 +192,31 @@ class IndexController extends RestController
             exit(json_encode($data));
         }
         $result = $usr->where(array('username'=>$username))->setField($data);
+        $url = C('URL') . "/users/${username}/password";
         if($result){
             $data = array(
-               // 'username'  =>$username,
                 'newpassword'  =>$data['password_hash']
             );
             $code = '200';
             $header = array(
             'Authorization: Bearer ' . $this->token
              ); 
+            $str = array('data'=>$data,'code'=>$code,'header'=>$header);
+            echo json_encode($str);
+            return $this->curl($url, $data, $header, "PUT");
             
-        }else{
+        }else{   
             $data = array('msg'    => '密码重置失败');
             $code = '201';
+            $str = array('data'=>$data,'code'=>$code);
+            echo json_encode($str);
         }
-        $str = array('data'=>$data,'code'=>$code,'header'=>$header);
-        echo json_encode($str);
+        //$str = array('data'=>$data,'code'=>$code,'header'=>$header);
+        //echo json_encode($str);
         //$data['newpassword'] = $data['password_hash'];
+       // return $this->curl($url, $data, $header, "PUT");
+
         
-        $url = C('URL') . "/users/${username}/password";
-        return $this->curl($url, $data, $header, "PUT");
     }
     
     /*
