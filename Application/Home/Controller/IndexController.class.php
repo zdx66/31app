@@ -179,20 +179,24 @@ class IndexController extends RestController
      */
     public function hx_user_update_password()
     {
-        $username = $_POST['username'];
-        $data['password_hash'] = md5(md5($_POST['newpassword']));
+        $data0 = file_get_contents('php://input');
+        $data0 = explode('&', $data0);
+        $password = explode("=", $data0[1]);
+        $password = $password[1];
+        $username = explode("=", $data0[0]);
+        $username = $username[1];
+        $data['password_hash'] = md5(md5($password)); 
         if($data['password_hash']== null ){
             $data = array('msg'=>'密码为空，重置失败');
             exit(json_encode($data));
         }
         $usr = D('user');
-        $user = $usr->where(array('username'=>$username))->find();
+        $user = $usr->where(array('username' => $username))->find();
         if(!$user){
             $data = array('msg'=>'该用户不存在，重置失败');
             exit(json_encode($data));
         }
-        $result = $usr->where(array('username'=>$username))->setField($data);
-        $url = C('URL') . "/users/${username}/password";
+        $result = $usr->where(array(' username ' => $username,'status'=>10))->setField($data);
         if($result){
             $data = array(
                 'newpassword'  =>$data['password_hash']
@@ -203,20 +207,14 @@ class IndexController extends RestController
              ); 
             $str = array('data'=>$data,'code'=>$code,'header'=>$header);
             echo json_encode($str);
-            return $this->curl($url, $data, $header, "PUT");
-            
+            $url = $this->url . "/users/${username}/password";
+            return $this->curl($url, $data, $header, "PUT");   
         }else{   
             $data = array('msg'    => '密码重置失败');
             $code = '201';
             $str = array('data'=>$data,'code'=>$code);
             echo json_encode($str);
-        }
-        //$str = array('data'=>$data,'code'=>$code,'header'=>$header);
-        //echo json_encode($str);
-        //$data['newpassword'] = $data['password_hash'];
-       // return $this->curl($url, $data, $header, "PUT");
-
-        
+        }       
     }
     
     /*
