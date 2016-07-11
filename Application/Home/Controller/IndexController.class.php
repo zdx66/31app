@@ -193,7 +193,7 @@ class IndexController extends RestController
         $result = $usr->where(array('username'=>$username))->setField($data);
         if($result){
             $data = array(
-                'username'  =>$username,
+               // 'username'  =>$username,
                 'newpassword'  =>$data['password_hash']
             );
             $code = '200';
@@ -207,7 +207,7 @@ class IndexController extends RestController
         }
         $str = array('data'=>$data,'code'=>$code,'header'=>$header);
         echo json_encode($str);
-        $data['newpassword'] = $data['password_hash'];
+        //$data['newpassword'] = $data['password_hash'];
         
         $url = C('URL') . "/users/${username}/password";
         return $this->curl($url, $data, $header, "PUT");
