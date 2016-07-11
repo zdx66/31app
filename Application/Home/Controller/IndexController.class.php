@@ -22,31 +22,21 @@ class IndexController extends RestController
      */
     function hx_register()
     { 
-        /*$data = $_POST;
-        $data .= json_decode($data);
-        $file = 'error_log.txt';
-        $data .= date('Y-m-d h:i:s',time()).'/r/n';
-        if(file_put_contents($file, $data,FILE_APPEND)){
-            echo "写入成功";
-            dump($data);
-        }*/
-        
-        //$name = json_decode($_POST['username'],true);
-       // $pwd = json_decode($_POST['password'],true);
         $name = $_POST['username'];
-        $pwd = $_POST['password'];
-        if($name == null ){
-           $result =  json_encode($_POST);
+        $pwd = I('post.password');
+        if($name == null || $pwd == null){
+            $result = '用户名或密码为空，不能注册';
+           exit(json_encode($result));
         }
         
         $username = $name;
         $password = md5(md5($pwd));
-        $nickname = $username;
+        $nickname = $name;
 
         $user = D('User'); 
         $userData = D('UserData');
         $userProfile = D('UserProfile');
-        $res = $user->field('id')->where(array('username  '=>$username))->find();
+        $res = $user->field('id')->where(array('username '=>$username))->find();
         if($res){
             $result = array(   
             'flag' => 'error',   
@@ -60,6 +50,7 @@ class IndexController extends RestController
         $usr = $userData->add(array('user_id'=>$id));
         $usrp = $userProfile->add(array('user_id'=>$id));
         $url = C('URL') . "/users";
+        
         if($id && $usr && $usrp){ 
             $data = array(
                 'username' => $username,
@@ -75,20 +66,14 @@ class IndexController extends RestController
         }else{
                 $code ='201';
         }
-        $str = array('data' => $data,'header'=>$header);
+        $str = array('data' => $data,'header'=>$header,'code'=>$code);
         echo json_encode($str);
         return $this->curl($url, $data, $header, "POST");
     }
     
     //用户登录
     public function hx_login(){
-        $data = $_POST;
-        $data .= json_decode($data);
-        $file = 'error_log.txt';
-        $data .= date('Y-m-d h:i:s',time()).'/r/n';
-        if(file_put_contents($file, $data,FILE_APPEND)){
-            echo "写入成功";
-        }
+        
     }
     
     //用户退出登录
@@ -196,16 +181,38 @@ class IndexController extends RestController
         return $this->curl($url, "", $header, "GET");
     }
     /*
-     * 重置IM用户密码
+     * 重置IM用户密码$username, $newpassword
      */
-    public function hx_user_update_password($username, $newpassword)
+    public function hx_user_update_password()
     {
-        $url = C('URL') . "/users/${username}/password";
-        $header = array(
+        $username = I('post.username');
+        $da['password_hash'] = I('post.newpassword');
+        if($da['password_hash']== null ){
+            $data1 = array('msg'=>'密码为空，重置失败');
+            exit(json_encode($data1));
+        }
+        $usr = D('user');
+        $result = $usr->where(array('username'=>$username))->save($da);    
+        if($result){
+            $data1 = array(
+                'username'  =>$username,
+                'newpassword'  =>$da['password_hash']
+            );
+            $code = '200';
+            $header = array(
             'Authorization: Bearer ' . $this->token
-        );
-        $data['newpassword'] = $newpassword;
-        return $this->curl($url, $data, $header, "PUT");
+             ); 
+            
+        }else{
+            $data1 = array('msg'    => '密码重置失败');
+            $code = '201';
+        }
+        $str = array('data'=>$data1,'code'=>$code,'header'=>$header);
+        echo json_encode($str);
+        
+        $url = C('URL') . "/users/${username}/password";
+        $data1['newpassword'] = $da['password_hash'];
+        return $this->curl($url, $data1, $header, "PUT");
     }
     
     /*
@@ -235,10 +242,10 @@ class IndexController extends RestController
      *
      * curl
      */
-    private function curl($url, $data, $header = false, $method = "POST")
+    private function curl($data, $header = false, $method = "POST")
     {
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_URL, $url);
+        $ch = curl_init(C('URL') );
+        curl_setopt($ch, CURLOPT_URL, C('URL') );
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         if ($header) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
