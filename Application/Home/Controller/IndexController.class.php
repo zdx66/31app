@@ -39,8 +39,8 @@ class IndexController extends RestController
            $result =  json_encode($_POST);
         }
         
-        $username = $name['username'];
-        $password = md5(md5($pwd['password']));
+        $username = $name;
+        $password = md5(md5($pwd));
         $nickname = $username;
 
         $user = D('User'); 
