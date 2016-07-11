@@ -207,7 +207,7 @@ class IndexController extends RestController
         }
         $str = array('data'=>$data,'code'=>$code,'header'=>$header);
         echo json_encode($str);
-        
+        $data['newpassword'] = $newpassword;
         $url = C('URL') . "/users/${username}/password";
         return $this->curl($url, $data, $header, "PUT");
         
