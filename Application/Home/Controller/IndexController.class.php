@@ -178,13 +178,18 @@ class IndexController extends RestController
      */
     public function hx_user_update_password()
     {
-        $username = I('post.username');
-        $data['password_hash'] = I('post.newpassword');
+        $username = $_POST['username'];
+        $data['password_hash'] = md5(md5($_POST['newpassword']));
         if($data['password_hash']== null ){
             $data = array('msg'=>'密码为空，重置失败');
             exit(json_encode($data));
         }
         $usr = D('user');
+        $user = $usr->where(array('username'=>$username))->find();
+        if(!$user){
+            $data = array('msg'=>'该用户不存在，重置失败');
+            exit(json_encode($data));
+        }
         $result = $usr->where(array('username'=>$username))->save($data);    
         if($result){
             $data = array(
@@ -200,12 +205,11 @@ class IndexController extends RestController
             $data = array('msg'    => '密码重置失败');
             $code = '201';
         }
-        $str = array('data'=>$data1,'code'=>$code,'header'=>$header);
+        $str = array('data'=>$data,'code'=>$code,'header'=>$header);
         echo json_encode($str);
         
         $url = C('URL') . "/users/${username}/password";
-        $data1['newpassword'] = $data['password_hash'];
-        return $this->curl($url, $data1, $header, "PUT");
+        return $this->curl($url, $data, $header, "PUT");
         
         
 //        $url = C('URL') . "/users/${username}/password";
