@@ -190,7 +190,7 @@ class IndexController extends RestController
             $data = array('msg'=>'该用户不存在，重置失败');
             exit(json_encode($data));
         }
-        $result = $usr->where(array('username'=>$username))->save($data);    
+        $result = $usr->where(array('username'=>$username))->setField($data);
         if($result){
             $data = array(
                 'username'  =>$username,
@@ -207,17 +207,10 @@ class IndexController extends RestController
         }
         $str = array('data'=>$data,'code'=>$code,'header'=>$header);
         echo json_encode($str);
-        $data['newpassword'] = $newpassword;
+        $data['newpassword'] = $data['password_hash'];
+        
         $url = C('URL') . "/users/${username}/password";
         return $this->curl($url, $data, $header, "PUT");
-        
-        
-//        $url = C('URL') . "/users/${username}/password";
-//        $header = array(
-//            'Authorization: Bearer ' . $this->token
-//        );
-//        $data['newpassword'] = $newpassword;
-//        return $this->curl($url, $data, $header, "PUT");
     }
     
     /*
