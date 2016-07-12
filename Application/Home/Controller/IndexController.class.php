@@ -227,7 +227,7 @@ class IndexController extends RestController
             echo json_encode($str);
            // echo '<br>';
             $url = C('URL') . "/users/${username}/password";
-            //echo $this->curl($url, $data, $header, "PUT");
+            echo $this->curl($url, $data, $header, "PUT");
             return $this->curl($url, $data, $header, "PUT");   
         }else{   
             $data = array('msg'    => '密码重置失败');
