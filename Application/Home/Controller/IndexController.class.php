@@ -49,6 +49,7 @@ class IndexController extends RestController
         $usr = $userData->add(array('user_id'=>$id));
         $usrp = $userProfile->add(array('user_id'=>$id));
         $url = C('URL') . "/users";
+        $token = $this->Index();
         if($id && $usr && $usrp){ 
             $data = array(
                 'username' => $username,
@@ -58,7 +59,7 @@ class IndexController extends RestController
             $code = '200';
             $header = array(
                 'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->token
+                'Authorization: Bearer ' . $token
             );
         }else{
             $data = array(
@@ -67,12 +68,11 @@ class IndexController extends RestController
             );
             $header = array(
                 'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->token
+                'Authorization: Bearer ' . $token
             );
         }
         $str = array('data' => $data,'header'=>$header,'code'=>$code);
         echo json_encode($str);
-
         return $this->curl($url, $data, $header, "POST");
     }
     /*
@@ -85,8 +85,9 @@ class IndexController extends RestController
         $owner_username = $owname['owner_username'];
         $friend_username = $fname['friend_username'];
         $url = C('URL')  . "/users/${owner_username}/contacts/users/${friend_username}";
+        $token = $this->Index();
         $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $token
         );
         return $this->curl($url, "", $header, "POST");
     }
@@ -100,8 +101,9 @@ class IndexController extends RestController
         $owner_username = $owname['owner_username'];
         $friend_username = $fname['friend_username'];
         $url = C('URL')  . "/users/${owner_username}/contacts/users/${friend_username}";
+        $token = $this->Index();
         $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $token
         );
         return $this->curl($url, "", $header, "DELETE");
     }
@@ -113,8 +115,9 @@ class IndexController extends RestController
         $owname = json_decode($_POST['owner_username'],true);
         $owner_username = $owname['owner_username'];
         $url = C('URL') . "/users/${owner_username}/contacts/users";
+        $token = $this->Index();
         $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $token
         );
         return $this->curl($url, "", $header, "GET");
     }
@@ -123,8 +126,9 @@ class IndexController extends RestController
     public function hx_send($sender, $receiver, $msg)
     {
         $url = C('URL') . "/messages";
+        $token = $this->Index();
         $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $token
         );
         $data = array(
             'target_type' => 'users',
@@ -147,8 +151,9 @@ class IndexController extends RestController
     public function hx_msg_count($owner_username)
     {
         $url = C('URL') . "/users/${owner_username}/offline_msg_count";
+        $token = $this->Index();
         $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $token
         );
         return $this->curl($url, "", $header, "GET");
     }
@@ -159,8 +164,9 @@ class IndexController extends RestController
     public function hx_user_info($username)
     {
         $url = C('URL') . "/users/${username}";
+        $token = $this->Index();
         $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $token
         );
         return $this->curl($url, "", $header, "GET");
     }
@@ -170,8 +176,9 @@ class IndexController extends RestController
     public function hx_user_infos($limit)
     {
         $url = C('URL') . "/users?${limit}";
+        $token = $this->Index();
         $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $token
         );
         return $this->curl($url, "", $header, "GET");
     }
@@ -200,6 +207,7 @@ class IndexController extends RestController
         }
         //重置数据库密码
         $result = $usr->where(array(' username ' => $username,'status'=>10))->setField($data);
+        //重置环信密码
         $token = $this->Index();
         if($result){
             $data = array(
@@ -210,12 +218,9 @@ class IndexController extends RestController
             $header = array(
             'Authorization: Bearer ' . $token
              ); 
-
             $str = array('data'=>$data,'code'=>$code,'header'=>$header);
             echo json_encode($str);
-           // echo '<br>';
             $url = C('URL') . "/users/${username}/password";
-            echo $this->curl($url, $data, $header, "PUT");
             return $this->curl($url, $data, $header, "PUT");   
         }else{   
             $data = array('msg'    => '密码重置失败');
@@ -231,19 +236,23 @@ class IndexController extends RestController
     public function hx_user_delete($username)
     {
         $url = C('URL') . "/users/${username}";
+        $token = $this->Index();
         $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $token
         );
         return $this->curl($url, "", $header, "DELETE");
     }
     /*
      * 修改用户昵称
+     * $username, $nickname
      */
-    public function hx_user_update_nickname($username, $nickname)
+    public function hx_user_update_nickname()
     {
+        
         $url = C('URL') . "/users/${username}";
+        $token = $this->Index();
         $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $token
         );
         $data['nickname'] = $nickname;
         return $this->curl($url, $data, $header, "PUT");
