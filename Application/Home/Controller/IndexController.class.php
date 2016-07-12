@@ -16,6 +16,7 @@ class IndexController extends RestController
         );
         $rs = json_decode($this->curl($url, $data), true);
         $this->token = $rs['access_token'];
+        return $this->token;
     }
     /*
      * 注册IM用户(授权注册)$username, $password, $nickname
@@ -182,6 +183,7 @@ class IndexController extends RestController
         $data0 = file_get_contents('php://input');
         $data0 = explode('&', $data0);
         $password = explode("=", $data0[1]);
+        //前台获取的新密码
         $password = $password[1];
         $username = explode("=", $data0[0]);
         $username = $username[1];
@@ -196,6 +198,19 @@ class IndexController extends RestController
             $data = array('msg'=>'该用户不存在，重置失败');
             exit(json_encode($data));
         }
+        //重置环信密码
+//        $url = C('URL') . "/users/${username}/password";
+//        $header = array(
+//            'Authorization: Bearer ' . $this->Index()
+//        );
+//        //$data['newpassword'] = $data['password_hash'];
+//        $data = array(
+//            "username"  => $username,
+//            "newpassword"   => $data['password_hash']
+//        );
+//        echo $this->curl($url, $data, $header, "PUT"); 
+
+        //重置数据库密码
         $result = $usr->where(array(' username ' => $username,'status'=>10))->setField($data);
         if($result){
             $data = array(
@@ -204,13 +219,11 @@ class IndexController extends RestController
             );
             $code = '200';
             $header = array(
-            'Authorization: Bearer ' . $this->token
+            'Authorization: Bearer ' . $this->Index()
              ); 
             $str = array('data'=>$data,'code'=>$code,'header'=>$header);
             echo json_encode($str);
             $url = C('URL') . "/users/${username}/password";
-            DUMP($url);
-            dump($this->curl($url, $data, $header, "PUT"));
             return $this->curl($url, $data, $header, "PUT");   
         }else{   
             $data = array('msg'    => '密码重置失败');
