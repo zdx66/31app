@@ -191,7 +191,7 @@ class IndexController extends RestController
             exit(json_encode($data));
         }
         $usr = D('user');
-        $user = $usr->where(array('username' => $username))->find();
+        $user = $usr->field('password_hash')->where(array('username' => $username))->find();
         if(!$user){
             $data = array('msg'=>'该用户不存在，重置失败');
             exit(json_encode($data));
@@ -199,6 +199,7 @@ class IndexController extends RestController
         $result = $usr->where(array(' username ' => $username,'status'=>10))->setField($data);
         if($result){
             $data = array(
+                'username'      =>$username,
                 'newpassword'  =>$data['password_hash']
             );
             $code = '200';
@@ -207,7 +208,9 @@ class IndexController extends RestController
              ); 
             $str = array('data'=>$data,'code'=>$code,'header'=>$header);
             echo json_encode($str);
-            $url = $this->url . "/users/${username}/password";
+            $url = C('URL') . "/users/${username}/password";
+            DUMP($url);
+            dump($this->curl($url, $data, $header, "PUT"));
             return $this->curl($url, $data, $header, "PUT");   
         }else{   
             $data = array('msg'    => '密码重置失败');
