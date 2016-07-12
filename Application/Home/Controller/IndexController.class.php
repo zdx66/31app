@@ -225,6 +225,7 @@ class IndexController extends RestController
 
             $str = array('data'=>$data,'code'=>$code,'header'=>$header);
             echo json_encode($str);
+           // echo '<br>';
             $url = C('URL') . "/users/${username}/password";
             //echo $this->curl($url, $data, $header, "PUT");
             return $this->curl($url, $data, $header, "PUT");   
