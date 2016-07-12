@@ -212,6 +212,7 @@ class IndexController extends RestController
 
         //重置数据库密码
         $result = $usr->where(array(' username ' => $username,'status'=>10))->setField($data);
+        $token = $this->Index();
         if($result){
             $data = array(
                 'username'      =>$username,
@@ -219,11 +220,13 @@ class IndexController extends RestController
             );
             $code = '200';
             $header = array(
-            'Authorization: Bearer ' . $this->Index()
+            'Authorization: Bearer ' . $token
              ); 
+
             $str = array('data'=>$data,'code'=>$code,'header'=>$header);
             echo json_encode($str);
             $url = C('URL') . "/users/${username}/password";
+            //echo $this->curl($url, $data, $header, "PUT");
             return $this->curl($url, $data, $header, "PUT");   
         }else{   
             $data = array('msg'    => '密码重置失败');
