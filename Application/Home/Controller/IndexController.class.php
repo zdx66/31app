@@ -248,13 +248,36 @@ class IndexController extends RestController
      */
     public function hx_user_update_nickname()
     {
-        
+        $GetPutData = file_get_contents("php://input");
+        $GetPutData = explode("&", $GetPutData);
+        //用户名
+        $GetPutData[0] = explode("=", $GetPutData[0] );
+        $username = $GetPutData[0][1];
+        //密码
+        $GetPutData[1] = explode("=", $GetPutData[1]);
+        $nickname = $GetPutData[1][1];
+        if($username == null || $nickname == null)
+        {
+            exit(json_encode("用户名或密码不能为空"));
+        }
+        $data = array('nickname'=>$nickname);
+        $user = D('user');
+        //更改数据库昵称
+        $result = $user->where(array('username'=>$username))->setField($data);
         $url = C('URL') . "/users/${username}";
         $token = $this->Index();
         $header = array(
             'Authorization: Bearer ' . $token
         );
-        $data['nickname'] = $nickname;
+        if($result)
+        {
+            $str = array('data'=>$data,'code'=>'200',"header"=>$header);
+            echo json_encode($str);
+        }else{
+            $str = array('code'=>'201','msg'=>"昵称更改失败");
+            exit(json_encode($str));
+        }
+        //更改环信昵称
         return $this->curl($url, $data, $header, "PUT");
     }
     /*
