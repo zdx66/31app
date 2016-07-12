@@ -18,6 +18,11 @@ class IndexController extends RestController
         $this->token = $rs['access_token'];
         return $this->token;
     }
+    
+    function Login()
+    {
+        echo "i am login";
+    }
     /*
      * 注册IM用户(授权注册)$username, $password, $nickname
      */
@@ -264,7 +269,6 @@ class IndexController extends RestController
             $header = array(
                 'Authorization: Bearer ' . $token
             );
-            //
             $str = array("data"=>$data,"header"=>$header,"code"=>"200");
             echo json_encode($str);
             return $this->curl($url, $data, $header, "PUT");
