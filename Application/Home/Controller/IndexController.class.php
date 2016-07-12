@@ -266,7 +266,6 @@ class IndexController extends RestController
             );
             $str = array("data"=>$data,"header"=>$header,"code"=>"200");
             echo json_encode($str);
-            echo $this->curl($url, $data, $header, "PUT");
             return $this->curl($url, $data, $header, "PUT");
         }else{
             $data = array(
