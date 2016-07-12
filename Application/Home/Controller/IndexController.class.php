@@ -9,22 +9,19 @@ class IndexController extends RestController
     function Index()
     {
         $url = C('URL') . "/token";
-        echo $url = C('URL') . "/token";
         $data = array(
             'grant_type' => 'client_credentials',
             'client_id' => C('CLIENT_ID'),
             'client_secret' => C('CLIENT_SECRET')
         );
-        dump($data);
         $rs = json_decode($this->curl($url, $data), true);
         $this->token = $rs['access_token'];
-        echo $this->token;
         return $this->token;
     }
     /*
      * 注册IM用户(授权注册)$username, $password, $nickname
      */
-    function hx_registerhx_register()
+    function hx_register()
     {  
         $name = $_POST['username'];dump($name);
         $pwd = $_POST['password'];
@@ -201,22 +198,9 @@ class IndexController extends RestController
             $data = array('msg'=>'该用户不存在，重置失败');
             exit(json_encode($data));
         }
-        //重置环信密码
-//        $url = C('URL') . "/users/${username}/password";
-//        $header = array(
-//            'Authorization: Bearer ' . $this->Index()
-//        );
-//        //$data['newpassword'] = $data['password_hash'];
-//        $data = array(
-//            "username"  => $username,
-//            "newpassword"   => $data['password_hash']
-//        );
-//        echo $this->curl($url, $data, $header, "PUT"); 
-
         //重置数据库密码
         $result = $usr->where(array(' username ' => $username,'status'=>10))->setField($data);
         $token = $this->Index();
-        echo $token;
         if($result){
             $data = array(
                 'username'      =>$username,
