@@ -23,7 +23,7 @@ class IndexController extends RestController
      */
     function hx_register()
     {  
-        $name = $_POST['username'];dump($name);
+        $name = $_POST['username'];
         $pwd = $_POST['password'];
         if($name == null || $pwd ==null){
             $data= array('msg'=>'用户名或密码不为空');
@@ -182,6 +182,74 @@ class IndexController extends RestController
         );
         return $this->curl($url, "", $header, "GET");
     }
+    /**
+     * 修改用户密码
+     */
+    public function hx_user_alter_password()
+    {
+        $GetPutData = file_get_contents("php://input");
+        $GetPutData = explode("&", $GetPutData);
+        //用户名
+        $GetPutData[0] = explode("=", $GetPutData[0]);
+        $username = $GetPutData[0][1];
+        //原密码
+        $GetPutData[1] = explode("=", $GetPutData[1]);
+        $oldpassword = ($GetPutData[1][1]);
+        //新密码
+        $GetPutData[2] = explode("=", $GetPutData[2]);
+        $newpassword = $GetPutData[2][1];
+        if($username == null || $oldpassword == null || $newpassword == null){
+            $data = array(
+                "code"  => '201',
+                'msg'   => '参数不能为空'
+            );
+            exit(json_encode($data));
+        }
+        $user = D("user");
+        $data = array("username"=>$username,"password_hash"=>md5(md5($oldpassword)));
+        $result = $user->where($data)->find();
+        if(!$result)
+        {
+            $data = array(
+                "code"  => "201",
+                "msg"   => "用户名或密码输入错误"
+            );
+            exit(json_encode($data));
+        }
+        $data = array(
+            "password_hash"     =>  md5(md5($newpassword))
+        );
+        $res = $user->where(array("username"=>$username))->setField($data);
+        if($res)
+        {
+            $data = array(
+                "username"   => $username,
+                "newpassword"=> $data['password_hash']
+                );
+            $url = C('URL') . "/users/${username}/password";
+            $token = $this->Index();
+            $header = array(
+                'Authorization: Bearer ' . $token
+            );
+            $str = array("data"=>$data,"header"=>$header,"code"=>"200");
+            echo json_encode($str);
+            echo $this->curl($url, $data, $header, "PUT");
+            return $this->curl($url, $data, $header, "PUT");
+        }else{
+            $data = array(
+                "code"  =>  "201",
+                "msg"   =>  "修改密码操作失败"
+            );
+            exit(json_encode($data));
+                    
+        }
+        
+     
+        
+        
+               
+    }
+    
     /*
      * 重置IM用户密码$username, $newpassword
      */
