@@ -213,6 +213,7 @@ class IndexController extends RestController
         //重置数据库密码
         $result = $usr->where(array(' username ' => $username,'status'=>10))->setField($data);
         $token = $this->Index();
+        echo $token;
         if($result){
             $data = array(
                 'username'      =>$username,
