@@ -16,6 +16,7 @@ class IndexController extends RestController
         );
         $rs = json_decode($this->curl($url, $data), true);
         $this->token = $rs['access_token'];
+        echo $this->token;
         return $this->token;
     }
     
