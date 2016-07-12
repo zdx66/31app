@@ -159,15 +159,46 @@ class IndexController extends RestController
     }
     
     /*
-     * 获取IM用户[单个]
+     * 获取IM用户[单个]$username
      */
-    public function hx_user_info($username)
+    public function hx_user_info()
     {
+        $username = I("get.username");
+        if(!$username)
+        {
+            $data = array(
+                "code"      =>  "201",
+                "msg"       =>  "用户名不能为空"
+            );
+            exit(json_encode($data));
+        }
+        $user = D("user");
+        $result = $user
+                ->table("__USER__ AS user ")
+                ->join("__USER_DATA__ AS data on user.id = data.user_id")
+                ->join("__USER_PROFILE__ AS pro on user.id = pro.user_id")
+                ->field("*")
+                ->where(array("username" => $username))
+                ->find();
+        if(!$result){
+            $data = array(
+                "code"  =>  "201",
+                "msg"   =>  "该用户不存在"
+            );
+            exit(json_encode($data));
+        }
         $url = C('URL') . "/users/${username}";
         $token = $this->Index();
         $header = array(
             'Authorization: Bearer ' . $token
         );
+        //将用户信息返回给客户端
+        $str = array(
+            "data"  => $result,
+            "code"  => "200",
+            "header"    => $header
+        );
+        echo json_encode($str);
         return $this->curl($url, "", $header, "GET");
     }
     /*
@@ -216,8 +247,10 @@ class IndexController extends RestController
             );
             exit(json_encode($data));
         }
+        $time = time();
         $data = array(
-            "password_hash"     =>  md5(md5($newpassword))
+            "password_hash"     =>  md5(md5($newpassword)),
+            "update_at"         =>  $time
         );
         $res = $user->where(array("username"=>$username))->setField($data);
         if($res)
@@ -240,14 +273,8 @@ class IndexController extends RestController
                 "code"  =>  "201",
                 "msg"   =>  "修改密码操作失败"
             );
-            exit(json_encode($data));
-                    
-        }
-        
-     
-        
-        
-               
+            exit(json_encode($data));          
+        }              
     }
     
     /*
@@ -273,6 +300,7 @@ class IndexController extends RestController
             $data = array('msg'=>'该用户不存在，重置失败');
             exit(json_encode($data));
         }
+        $data['update_at'] = time();
         //重置数据库密码
         $result = $usr->where(array(' username ' => $username,'status'=>10))->setField($data);
         //重置环信密码
@@ -328,7 +356,8 @@ class IndexController extends RestController
         {
             exit(json_encode("用户名或密码不能为空"));
         }
-        $data = array('nickname'=>$nickname);
+        $time = time();
+        $data = array('nickname'=>$nickname,'update_at'=>$time);
         $user = D('user');
         //更改数据库昵称
         $result = $user->where(array('username'=>$username))->setField($data);
