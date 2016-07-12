@@ -9,11 +9,13 @@ class IndexController extends RestController
     function Index()
     {
         $url = C('URL') . "/token";
+        echo $url = C('URL') . "/token";
         $data = array(
             'grant_type' => 'client_credentials',
             'client_id' => C('CLIENT_ID'),
             'client_secret' => C('CLIENT_SECRET')
         );
+        dump($data);
         $rs = json_decode($this->curl($url, $data), true);
         $this->token = $rs['access_token'];
         echo $this->token;
@@ -22,9 +24,9 @@ class IndexController extends RestController
     /*
      * 注册IM用户(授权注册)$username, $password, $nickname
      */
-    function hx_register()
+    function hx_registerhx_register()
     {  
-        $name = $_POST['username'];
+        $name = $_POST['username'];dump($name);
         $pwd = $_POST['password'];
         if($name == null || $pwd ==null){
             $data= array('msg'=>'用户名或密码不为空');
