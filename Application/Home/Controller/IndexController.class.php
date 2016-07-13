@@ -75,6 +75,81 @@ class IndexController extends RestController
         echo json_encode($str);
         return $this->curl($url, $data, $header, "POST");
     }
+    /**
+     * 修改个人基本信息接口
+     */
+    function update_user_info(){
+        
+        $usermodel = D('user');
+        $data = I("post.");
+        $username = $data['username'];
+        //数据更改的时间
+        $time = time();
+        $data['update_at'] = $time;
+        unset($data['username']);
+        //更新用户信息
+        $result = $usermodel
+                ->where(array("username"=>$username))
+                ->setfield($data);
+        if($result)
+        {
+            $data = array(
+                "code"  => "200",
+                "msg"   =>  "修改成功"
+            );
+            exit(json_encode($data));
+        }else{
+             $data = array(
+                "code"  => "201",
+                "msg"   =>  "该用户不存在，修改失败"
+            );
+             exit(json_encode($data));
+        }    
+    }
+    
+    /**
+     * 更新用户头像
+     */
+    function update_user_avatar()
+    {
+        
+    }
+    
+    /**
+     * 更新用户扩展信息接口
+     */
+    function user_profile_info()
+    {
+        $user_profile_model = D("UserProfile");
+        $data = I("post.");
+        $user_id = $data['user_id'];
+        unset($data['user_id']);
+        $res = $user_profile_model->where(array("user_id"=>$user_id))->setField($data);
+        if(!$res)
+        {
+            $data = array(
+                'code' =>   '201',
+                'msg'  =>   '用户不存在，更新失败'
+            );
+            exit(json_encode($data));
+        }
+        $data = array(
+            'code'  =>  '200',
+            'msg'   =>  '操作成功'
+        );
+        exit(json_encode($data));
+    }
+    
+    /**
+     * 更换用户照片
+     * 1、头像
+     * 2、其他照片
+     */
+    function update_user_img()
+    {
+        
+    }
+    
     /*
      * 给IM用户的添加好友 $owner_username, $friend_username
      */
@@ -202,9 +277,9 @@ class IndexController extends RestController
         return $this->curl($url, "", $header, "GET");
     }
     /*
-     * 获取IM用户[批量]
+     * 获取IM用户[批量]$limit
      */
-    public function hx_user_infos($limit)
+    public function hx_user_infos()
     {
         $url = C('URL') . "/users?${limit}";
         $token = $this->Index();
