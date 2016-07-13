@@ -84,22 +84,30 @@ class IndexController extends RestController
         $data = I("post.");
         $username = $data['username'];
         //验证手机号
-        if(!preg_match("/^13[0-9]{1}[0-9]{8}$|15[0189]{1}[0-9]{8}$|189[0-9]{8}$/",$data['cellphone'])){
+        $cellphone = isset($data['cellphone'])?$data['cellphone']:'';
+        if($cellphone){
+            if(!preg_match("/^13[0-9]{1}[0-9]{8}$|15[0189]{1}[0-9]{8}$|189[0-9]{8}$/",$cellphone)){
             $data = array(
                 'code'  =>  '201',
                 'msg'   =>  '手机号码格式不合法'
             );
             exit(json_encode($data));
+            }
         }
+        
         //验证邮箱格式
-        $pattern = "/^([0-9A-Za-z\\-_\\.]+)@([0-9a-z]+\\.[a-z]{2,3}(\\.[a-z]{2})?)$/i";   
-        if(!preg_match($pattern, $data['email'] )){
-            $data = array(
-                'code'  =>  '201',
-                'msg'   =>  '邮箱格式不合法'
-            );
-            exit(json_encode($data));
+        $email = isset($data['email'])?$data['email']:'';
+        if($email){
+            $pattern = "/^([0-9A-Za-z\\-_\\.]+)@([0-9a-z]+\\.[a-z]{2,3}(\\.[a-z]{2})?)$/i";   
+            if(!preg_match($pattern, $email )){
+                $data = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '邮箱格式不合法'
+                );
+                exit(json_encode($data));
+            }
         }
+        
         //数据更改的时间
         $time = time();
         $data['update_at'] = $time;
