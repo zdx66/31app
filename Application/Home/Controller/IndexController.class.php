@@ -18,7 +18,7 @@ class IndexController extends RestController
         $this->token = $rs['access_token'];
         return $this->token;
     }
-    /*
+    /*:
      * 注册IM用户(授权注册)$username, $password, $nickname
      */
     function hx_register()
@@ -164,6 +164,7 @@ class IndexController extends RestController
     public function hx_user_info()
     {
         $username = I("get.username");
+        
         if(!$username)
         {
             $data = array(
