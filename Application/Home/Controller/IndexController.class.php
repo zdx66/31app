@@ -83,6 +83,23 @@ class IndexController extends RestController
         $usermodel = D('user');
         $data = I("post.");
         $username = $data['username'];
+        //验证手机号
+        if(!preg_match("/^13[0-9]{1}[0-9]{8}$|15[0189]{1}[0-9]{8}$|189[0-9]{8}$/",$data['cellphone'])){
+            $data = array(
+                'code'  =>  '201',
+                'msg'   =>  '手机号码格式不合法'
+            );
+            exit(json_encode($data));
+        }
+        //验证邮箱格式
+        $pattern = "/^([0-9A-Za-z\\-_\\.]+)@([0-9a-z]+\\.[a-z]{2,3}(\\.[a-z]{2})?)$/i";   
+        if(!preg_match($pattern, $data['email'] )){
+            $data = array(
+                'code'  =>  '201',
+                'msg'   =>  '邮箱格式不合法'
+            );
+            exit(json_encode($data));
+        }
         //数据更改的时间
         $time = time();
         $data['update_at'] = $time;
@@ -93,13 +110,16 @@ class IndexController extends RestController
                 ->setfield($data);
         if($result)
         {
-            $data = array(
+            $data['username'] = $username;
+            $str = array(
+                'data' =>  $data,
                 "code"  => "200",
                 "msg"   =>  "修改成功"
             );
-            exit(json_encode($data));
+            exit(json_encode($str));
         }else{
              $data = array(
+
                 "code"  => "201",
                 "msg"   =>  "该用户不存在，修改失败"
             );
@@ -108,11 +128,29 @@ class IndexController extends RestController
     }
     
     /**
-     * 更新用户头像
+     * 更新用户其他信息
      */
-    function update_user_avatar()
+    function update_user_other_data()
     {
-        
+        $userdata_model = D("UserData");
+        $data = I("post.");
+        $user_id = $data['user_id'];
+        unset($data['user_id']);
+        $res = $userdata_model->where(array("user_id"=>$user_id))->setField($data);
+        if(!$res){
+            $data = array(
+                'code'  =>  '201',
+                'msg'   =>  '操作失败'
+            );
+            exit(json_encode($data));
+        }
+        $data['user_id']    = $user_id;
+        $str = array(
+            'data'  =>  $data,
+            'code'  =>  '200',
+            'msg'   =>  '操作成功'
+        );
+        exit(json_encode($str));
     }
     
     /**
@@ -133,11 +171,13 @@ class IndexController extends RestController
             );
             exit(json_encode($data));
         }
-        $data = array(
+        $data['user_id'] = $user_id;
+        $str = array(
+            'data'  =>  $data,
             'code'  =>  '200',
             'msg'   =>  '操作成功'
         );
-        exit(json_encode($data));
+        exit(json_encode($str));
     }
     
     /**
