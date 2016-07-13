@@ -164,7 +164,7 @@ class IndexController extends RestController
     public function hx_user_info()
     {
         $username = I("get.username");
-        
+        echo "1212";
         if(!$username)
         {
             $data = array(
