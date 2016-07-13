@@ -118,12 +118,12 @@ class IndexController extends RestController
             );
             exit(json_encode($str));
         }else{
-             $data = array(
-
+             $str = array(
+                'data'  => $data,
                 "code"  => "201",
-                "msg"   =>  "该用户不存在，修改失败"
+                "msg"   =>  "操作失败"
             );
-             exit(json_encode($data));
+             exit(json_encode($str));
         }    
     }
     
@@ -138,11 +138,12 @@ class IndexController extends RestController
         unset($data['user_id']);
         $res = $userdata_model->where(array("user_id"=>$user_id))->setField($data);
         if(!$res){
-            $data = array(
+            $str = array(
+                'data'  =>  $data,
                 'code'  =>  '201',
                 'msg'   =>  '操作失败'
             );
-            exit(json_encode($data));
+            exit(json_encode($str));
         }
         $data['user_id']    = $user_id;
         $str = array(
@@ -165,11 +166,12 @@ class IndexController extends RestController
         $res = $user_profile_model->where(array("user_id"=>$user_id))->setField($data);
         if(!$res)
         {
-            $data = array(
-                'code' =>   '201',
-                'msg'  =>   '用户不存在，更新失败'
+            $str = array(
+                'data'  =>  $data,
+                'code'  =>   '201',
+                'msg'   =>   '操作失败'
             );
-            exit(json_encode($data));
+            exit(json_encode($str));
         }
         $data['user_id'] = $user_id;
         $str = array(
