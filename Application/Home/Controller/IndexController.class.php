@@ -75,6 +75,7 @@ class IndexController extends RestController
         echo json_encode($str);
         return $this->curl($url, $data, $header, "POST");
     }
+    
     /**
      * 修改个人基本信息接口
      */
@@ -83,6 +84,7 @@ class IndexController extends RestController
         $usermodel = D('user');
         $data = I("post.");
         $username = $data['username'];
+        
         //验证手机号
         $cellphone = isset($data['cellphone'])?$data['cellphone']:'';
         if($cellphone){
@@ -116,6 +118,7 @@ class IndexController extends RestController
         $result = $usermodel
                 ->where(array("username"=>$username))
                 ->setfield($data);
+        echo $result;
         if($result)
         {
             $data['username'] = $username;
@@ -169,6 +172,9 @@ class IndexController extends RestController
     {
         $user_profile_model = D("UserProfile");
         $data = I("post.");
+        $data = checkDataPost($data);
+        dump($data);
+        die;
         $user_id = $data['user_id'];
         unset($data['user_id']);
         $res = $user_profile_model->where(array("user_id"=>$user_id))->setField($data);
@@ -197,7 +203,62 @@ class IndexController extends RestController
      */
     function update_user_img()
     {
+        $imgData    =   I('post.');
+        $user_id = $imgData['user_id'];
         
+        //是否更换头像
+        $url = 'Public/Uploads/'.date("Y-m-d",time()).'/';
+        $savename = time();
+        $path = $url.$savename;
+        $imgData['file_1'] = isset($imgData['file_1'])?$imgData['file_1']:'';
+        //将+号替换成空格
+        //$imgData['file_1'] = str_replace(" ","+",$imgData['file_1']);
+
+        if($imgData['file_1']){
+            if(!is_base64_encoded($imgData['file_1'])){
+                $str = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '传过来的头像不是约定的编码'
+                );
+                exit(json_encode($str));
+            } 
+            $imgData['file_1'] = base64_decode($imgData['file_1']);
+            //先删除服务器原来的图片
+            $userProfile = D("UserProfile");
+            $oldimg = $userProfile->field("file_1")->where(array("user_id" => $user_id))->find();
+            if($oldimg){
+                $image = new \Think\Image();
+                $image->open($oldimg['file_1']);
+                unlink($oldimg['file_1']);
+            }
+
+            //将上传的图片放到服务器端
+            $imgData['file_1']  = file_put_contents($path.".jpg", $imgData['file_1']);
+            //将图片放到数据库中
+            $imgPath = $path.'.jpg';
+            $data = array("file_1"=>$imgPath);
+            
+            $res = $userProfile->where(array("user_id" => $user_id))->setField($data);
+            if($res)
+            {
+                $data['user_id'] = $user_id;
+                $str = array(
+                    'data'  =>  $data,
+                    'code'  =>  "200",
+                    'msg'   =>  "头像更新成功"
+                );
+                exit(json_encode($str));
+            }else{
+                $error = mysql_error();
+                $str = array(
+                    'code'  =>  "201",
+                    "msg"   =>  "头像更新失败"
+                );
+                exit(json_encode($str));
+            }
+                
+        }
+        //其他照片
     }
     
     /*
