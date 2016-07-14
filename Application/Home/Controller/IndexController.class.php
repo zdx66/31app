@@ -207,10 +207,10 @@ class IndexController extends RestController
         $user_id    =   $imgData['user_id'];
 
         //$imgpath = $_SERVER['DOCUMENT_ROOT']."/Public/Uploads/";//.date("Y-m-d",time()).'/'
-        //$PHP_SELF = $_SERVER['PHP_SELF'];'http://'.$_SERVER['HTTP_HOST']
+        //$PHP_SELF = $_SERVER['PHP_SELF'];'http://'.$_SERVER['HTTP_HOST'].
         
         
-        $imgpath = 'http://'.$_SERVER['HTTP_HOST']."/Public/Uploads/".date("Y-m-d",time()).'/';
+        $imgpath = 'http://'.$_SERVER['HTTP_HOST']."/Public/Uploads/";
         dump($imgpath);
 //        if(is_dir($imgpath))
 //        {
