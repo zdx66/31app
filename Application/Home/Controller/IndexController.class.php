@@ -216,6 +216,7 @@ class IndexController extends RestController
             
         }else{
             echo "路径不存在";
+            mkdir($imgpath, $mode);
         }
         $imgData['file_1']  = file_put_contents($imgpath.time().".jpg", $imgData['file_1']);
         dump($imgData['file_1']);
