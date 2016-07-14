@@ -204,13 +204,25 @@ class IndexController extends RestController
     function update_user_img()
     {
         $imgData    =   I('post.');
-        $user_id = $imgData['user_id'];
+        $user_id    =   $imgData['user_id'];
         
+        $imgpath = $_SERVER['DOCUMENT_ROOT']."/Public/Uploads/".date("Y-m-d",time()).'/';
+        dump($imgpath);
+        if(is_dir($imgpath))
+        {
+            echo "服务器根路径是".$imgpath;
+            
+        }else{
+            echo "路径不存在";
+        }
+        $imgData['file_1']  = file_put_contents($imgpath.time().".jpg", $imgData['file_1']);
+        dump($imgData['file_1']);
+        die;
         //是否更换头像
-        $url = 'Public/Uploads/'.date("Y-m-d",time()).'/';
-        $savename = time();
-        $path = $url.$savename;
-        $imgData['file_1'] = isset($imgData['file_1'])?$imgData['file_1']:'';
+        $url    =   'Public/Uploads/'.date("Y-m-d",time()).'/';
+        $savename   =    time();
+        $path   =   $url.$savename;
+        $imgData['file_1']  =   isset($imgData['file_1'])?$imgData['file_1']:'';
         //将+号替换成空格
         //$imgData['file_1'] = str_replace(" ","+",$imgData['file_1']);
 
