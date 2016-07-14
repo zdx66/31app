@@ -226,7 +226,7 @@ class IndexController extends RestController
             //先删除服务器原来的图片
             $userProfile = D("UserProfile");
             $oldimg = $userProfile->field("file_1")->where(array("user_id" => $user_id))->find();
-            if($oldimg){
+            if($oldimg['file_1']){
                 $image = new \Think\Image();
                 $image->open($oldimg['file_1']);
                 unlink($oldimg['file_1']);
@@ -259,6 +259,8 @@ class IndexController extends RestController
                 
         }
         //其他照片
+        
+        
     }
     
     /*
