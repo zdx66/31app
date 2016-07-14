@@ -205,21 +205,23 @@ class IndexController extends RestController
     {
         $imgData    =   I('post.');
         $user_id    =   $imgData['user_id'];
-        $upload = new \Think\Upload();
+
         //$imgpath = $_SERVER['DOCUMENT_ROOT']."/Public/Uploads/";//.date("Y-m-d",time()).'/'
-        //$PHP_SELF = $_SERVER['PHP_SELF'];
-        dump(__FILE__);
-        $imgpath = 'http://'.$_SERVER['HTTP_HOST'].substr($PHP_SELF,0,  strrpos($PHP_SELF, '/')+1)."/Public/Uploads/";
+        //$PHP_SELF = $_SERVER['PHP_SELF'];'http://'.$_SERVER['HTTP_HOST']
+        
+        
+        $imgpath = 'http://'.$_SERVER['HTTP_HOST']."/Public/Uploads/".date("Y-m-d",time()).'/';
         dump($imgpath);
-        if(is_dir($imgpath))
-        {
-            echo "服务器根路径是".$imgpath;
-            
-        }else{
-            echo "路径不存在";
-            mkdir($imgpath, $mode);
-        }
-        $imgData['file_1']  = file_put_contents($imgpath.time().".jpg", $imgData['file_1']);
+//        if(is_dir($imgpath))
+//        {
+//            echo "服务器根路径是".$imgpath;
+//            
+//        }else{
+//            echo "路径不存在";
+//            mkdir($imgpath, $mode);
+//        }
+        $time = time();
+        $imgData['file_1']  = file_put_contents($imgpath.$time.".jpg", $imgData['file_1']);
         dump($imgData['file_1']);
         die;
         //是否更换头像
