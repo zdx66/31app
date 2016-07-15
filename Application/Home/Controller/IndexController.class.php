@@ -230,7 +230,14 @@ class IndexController extends RestController
             $time = date("Y-m-d", time());
             $imgpath = "Public/Uploads/".$time."/";
             if(!is_dir($imgpath)){
-                mkdir($imgpath,'755');
+                echo "不存在该路径";
+                if(mkdir($imgpath,'755'))
+                {
+                    echo "路径创建成功";
+                }else{
+                    echo "无法创建该路径";
+                }
+
             }else{echo "存在该路径";}
             if(!file_exists($imgpath.$imgData['file_1'].".jpg"))
             {
