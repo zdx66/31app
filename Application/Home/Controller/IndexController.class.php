@@ -136,9 +136,8 @@ class IndexController extends RestController
             $imgpath = "Public/Uploads/".$time."/";
             if(!is_dir($imgpath)){
                 echo "不存在该路径";
-                if(mkdir($imgpath))
-                {
-                    chmod($imgpath, "0777");
+                if(mkdir($imgpath,0777,true))
+                {       
                     echo "路径创建成功";
                 }else{
                     echo "无法创建该路径";
