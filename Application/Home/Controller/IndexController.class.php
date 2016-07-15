@@ -205,33 +205,9 @@ class IndexController extends RestController
     {
         $imgData    =   I('post.');
         $user_id    =   $imgData['user_id'];
-
-        //$imgpath = $_SERVER['DOCUMENT_ROOT']."/Public/Uploads/";//.date("Y-m-d",time()).'/'
-        //$PHP_SELF = $_SERVER['PHP_SELF'];'http://'.$_SERVER['HTTP_HOST'].
-        
-        
-        $imgpath = 'http://'.$_SERVER['HTTP_HOST']."/Public/Uploads/";
-        dump($imgpath);
-//        if(is_dir($imgpath))
-//        {
-//            echo "服务器根路径是".$imgpath;
-//            
-//        }else{
-//            echo "路径不存在";
-//            mkdir($imgpath, $mode);
-//        }
-        $time = time();
-        $imgData['file_1']  = file_put_contents($imgpath.$time.".jpg", $imgData['file_1']);
-        dump($imgData['file_1']);
-        die;
+       
         //是否更换头像
-        $url    =   'Public/Uploads/'.date("Y-m-d",time()).'/';
-        $savename   =    time();
-        $path   =   $url.$savename;
         $imgData['file_1']  =   isset($imgData['file_1'])?$imgData['file_1']:'';
-        //将+号替换成空格
-        //$imgData['file_1'] = str_replace(" ","+",$imgData['file_1']);
-
         if($imgData['file_1']){
             if(!is_base64_encoded($imgData['file_1'])){
                 $str = array(
@@ -240,8 +216,7 @@ class IndexController extends RestController
                 );
                 exit(json_encode($str));
             } 
-            $imgData['file_1'] = base64_decode($imgData['file_1']);
-            //先删除服务器原来的图片
+            //查看用户是否已经有头像，有的话先删除服务器原来的图片
             $userProfile = D("UserProfile");
             $oldimg = $userProfile->field("file_1")->where(array("user_id" => $user_id))->find();
             if($oldimg['file_1']){
@@ -249,13 +224,22 @@ class IndexController extends RestController
                 $image->open($oldimg['file_1']);
                 unlink($oldimg['file_1']);
             }
-
-            //将上传的图片放到服务器端
-            $imgData['file_1']  = file_put_contents($path.".jpg", $imgData['file_1']);
-            //将图片放到数据库中
-            $imgPath = $path.'.jpg';
-            $data = array("file_1"=>$imgPath);
             
+            //解码并把图片放在服务器上
+            $imgData['file_1'] = base64_decode(str_replace('data:image/png;base64,', '', $imgData['file_1']));
+            $time = date("Y-m-d", time());
+            $imgpath = "Public/Uploads/".$time."/";
+            if(!is_dir($imgpath)){
+                mkdir($imgpath,'755');
+            }else{echo "存在该路径";}
+            if(!file_exists($imgpath.$imgData['file_1'].".jpg"))
+            {
+                $imgname = time();
+                file_put_contents ($imgpath.$imgname.".jpg", $imgData['file_1'], FILE_USE_INCLUDE_PATH);
+            }
+            
+            //将新的图片路径放到数据库中
+            $data = array("file_1"=>$imgpath.$imgname.".jpg");
             $res = $userProfile->where(array("user_id" => $user_id))->setField($data);
             if($res)
             {
