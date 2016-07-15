@@ -88,12 +88,12 @@ class IndexController extends RestController
         //验证手机号
         $cellphone = isset($data['cellphone'])?$data['cellphone']:'';
         if($cellphone){
-            if(!preg_match("/^13[0-9]{1}[0-9]{8}$|15[0189]{1}[0-9]{8}$|189[0-9]{8}$/",$cellphone)){
-            $data = array(
-                'code'  =>  '201',
-                'msg'   =>  '手机号码格式不合法'
-            );
-            exit(json_encode($data));
+            if(!is_cellphone($cellphone)){
+                $str = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '输入的手机号不合法'
+                ); 
+                exit(json_encode($str));
             }
         }
         
@@ -108,6 +108,69 @@ class IndexController extends RestController
                 );
                 exit(json_encode($data));
             }
+        }
+        
+        //是否更换头像
+        $data['avatar']  =   isset($data['avatar'])?$data['avatar']:'';
+        $data['avatar'] = substr($data['avatar'], strpos($data['avatar'], ",")+1);
+        if($data['avatar']){
+            if(!is_base64_encoded($data['avatar'])){
+                $str = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '传过来的头像不是约定的编码'
+                );
+                exit(json_encode($str));
+            } 
+            
+            //查看用户是否已经有头像，有的话先删除服务器原来的图片
+            $oldimg = $usermodel->field("avatar")->where(array("username" => $username))->find();
+            if($oldimg['avatar']){
+                $image = new \Think\Image();
+                $image->open($oldimg['avatar']);
+                unlink($oldimg['avatar']);
+            }
+            
+            //解码并把图片放在服务器上
+            $data['avatar'] = base64_decode(str_replace(" ","+",$data['avatar']));
+            $time = date("Y-m", time());
+            $imgpath = "Public/Uploads/".$time."/";
+            if(!is_dir($imgpath)){
+                echo "不存在该路径";
+                if(mkdir($imgpath,'0777'))
+                {
+                    echo "路径创建成功";
+                }else{
+                    echo "无法创建该路径";
+                }
+
+            }else{echo "存在该路径";}
+            if(!file_exists($imgpath.$data['avatar'].".jpg"))
+            {
+                $imgname = time();
+                file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
+            }
+            
+            //将新的图片路径放到数据库中
+            $data['avatar'] = $imgpath.$imgname.".jpg";
+//            $res = $usermodel->where(array("username" => $username))->setField($data);
+//            if($res)
+//            {
+//                $data['user_id'] = $user_id;
+//                $str = array(
+//                    'data'  =>  $data,
+//                    'code'  =>  "200",
+//                    'msg'   =>  "头像更新成功"
+//                );
+//                exit(json_encode($str));
+//            }else{
+//                $error = mysql_error();
+//                $str = array(
+//                    'code'  =>  "201",
+//                    "msg"   =>  "头像更新失败"
+//                );
+//                exit(json_encode($str));
+//            }
+                
         }
         
         //数据更改的时间
@@ -197,76 +260,15 @@ class IndexController extends RestController
     }
     
     /**
-     * 更换用户照片
-     * 1、头像
-     * 2、其他照片
+     * 更换用户档案照
+     * 
      */
     function update_user_img()
     {
         $imgData    =   I('post.');
         $user_id    =   $imgData['user_id'];
        
-        //是否更换头像
-        $imgData['file_1']  =   isset($imgData['file_1'])?$imgData['file_1']:'';
-        if($imgData['file_1']){
-            if(!is_base64_encoded($imgData['file_1'])){
-                $str = array(
-                    'code'  =>  '201',
-                    'msg'   =>  '传过来的头像不是约定的编码'
-                );
-                exit(json_encode($str));
-            } 
-            //查看用户是否已经有头像，有的话先删除服务器原来的图片
-            $userProfile = D("UserProfile");
-            $oldimg = $userProfile->field("file_1")->where(array("user_id" => $user_id))->find();
-            if($oldimg['file_1']){
-                $image = new \Think\Image();
-                $image->open($oldimg['file_1']);
-                unlink($oldimg['file_1']);
-            }
-            
-            //解码并把图片放在服务器上
-            $imgData['file_1'] = base64_decode(str_replace('data:image/png;base64,', '', $imgData['file_1']));
-            $time = date("Y-m-d", time());
-            $imgpath = "Public/Uploads/".$time."/";
-            if(!is_dir($imgpath)){
-                echo "不存在该路径";
-                if(mkdir($imgpath,'755'))
-                {
-                    echo "路径创建成功";
-                }else{
-                    echo "无法创建该路径";
-                }
-
-            }else{echo "存在该路径";}
-            if(!file_exists($imgpath.$imgData['file_1'].".jpg"))
-            {
-                $imgname = time();
-                file_put_contents ($imgpath.$imgname.".jpg", $imgData['file_1'], FILE_USE_INCLUDE_PATH);
-            }
-            
-            //将新的图片路径放到数据库中
-            $data = array("file_1"=>$imgpath.$imgname.".jpg");
-            $res = $userProfile->where(array("user_id" => $user_id))->setField($data);
-            if($res)
-            {
-                $data['user_id'] = $user_id;
-                $str = array(
-                    'data'  =>  $data,
-                    'code'  =>  "200",
-                    'msg'   =>  "头像更新成功"
-                );
-                exit(json_encode($str));
-            }else{
-                $error = mysql_error();
-                $str = array(
-                    'code'  =>  "201",
-                    "msg"   =>  "头像更新失败"
-                );
-                exit(json_encode($str));
-            }
-                
-        }
+        
         //其他照片
         
         
