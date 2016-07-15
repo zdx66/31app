@@ -136,8 +136,9 @@ class IndexController extends RestController
             $imgpath = "Public/Uploads/".$time."/";
             if(!is_dir($imgpath)){
                 echo "不存在该路径";
-                if(mkdir($imgpath,'0777'))
+                if(mkdir($imgpath))
                 {
+                    chmod($imgpath, "0777");
                     echo "路径创建成功";
                 }else{
                     echo "无法创建该路径";
@@ -151,26 +152,7 @@ class IndexController extends RestController
             }
             
             //将新的图片路径放到数据库中
-            $data['avatar'] = $imgpath.$imgname.".jpg";
-//            $res = $usermodel->where(array("username" => $username))->setField($data);
-//            if($res)
-//            {
-//                $data['user_id'] = $user_id;
-//                $str = array(
-//                    'data'  =>  $data,
-//                    'code'  =>  "200",
-//                    'msg'   =>  "头像更新成功"
-//                );
-//                exit(json_encode($str));
-//            }else{
-//                $error = mysql_error();
-//                $str = array(
-//                    'code'  =>  "201",
-//                    "msg"   =>  "头像更新失败"
-//                );
-//                exit(json_encode($str));
-//            }
-                
+            $data['avatar'] = $imgpath.$imgname.".jpg"; 
         }
         
         //数据更改的时间
