@@ -133,17 +133,17 @@ class IndexController extends RestController
             //解码并把图片放在服务器上
             $data['avatar'] = base64_decode(str_replace(" ","+",$data['avatar']));
             $time = date("Y-m", time());
-            $imgpath = "Public/Uploads/avatar/";
-//            if(!is_dir($imgpath)){
-//                echo "不存在该路径";
-//                if(mkdir($imgpath,0777,true))
-//                {       
-//                    echo "路径创建成功";
-//                }else{
-//                    echo "无法创建该路径";
-//                }
-//
-//            }else{echo "存在该路径";}
+            $imgpath = "Public/Uploads/avatar/".$time;
+            if(!is_dir($imgpath)){
+                echo "不存在该路径";
+                if(mkdir($imgpath,0777,true))
+                {       
+                    echo "路径创建成功";
+                }else{
+                    echo "无法创建该路径";
+                }
+
+            }else{echo "存在该路径";}
             if(!file_exists($imgpath.$data['avatar'].".jpg"))
             {
                 $imgname = time();
