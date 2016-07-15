@@ -127,7 +127,7 @@ class IndexController extends RestController
             if($oldimg['avatar']){
                 $image = new \Think\Image();
                 $image->open($oldimg['avatar']);
-                unlink("/var/www/31app/".$oldimg['avatar']);
+                unlink($_SERVER['DOCUMENT_ROOT'].$oldimg['avatar']);
             }
             
             //解码并把图片放在服务器上
@@ -135,21 +135,12 @@ class IndexController extends RestController
             $time = date("Y-m", time());
             $imgpath = "Public/Uploads/".$time.'/';
             if(!is_dir($imgpath)){
-                echo "不存在该路径";
-                if(mkdir($imgpath,0777,true))
-                {       
-                    echo "路径创建成功";
-                }else{
+                if(!mkdir($imgpath,0777,true))
+                {         
                     echo "无法创建该路径";
                 }
 
-            }else{echo "存在该路径";}
-            if(!file_exists($imgpath.$data['avatar'].".jpg"))
-            {
-                $imgname = time();
-                file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
             }
-            
             //将新的图片路径放到数据库中
             $data['avatar'] = $imgpath.$imgname.".jpg"; 
         }
@@ -162,7 +153,6 @@ class IndexController extends RestController
         $result = $usermodel
                 ->where(array("username"=>$username))
                 ->setfield($data);
-        echo $result;
         if($result)
         {
             $data['username'] = $username;
@@ -171,6 +161,9 @@ class IndexController extends RestController
                 "code"  => "200",
                 "msg"   =>  "修改成功"
             );
+            //将图片存到服务器上
+            $imgname = time();
+            file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
             exit(json_encode($str));
         }else{
              $str = array(
