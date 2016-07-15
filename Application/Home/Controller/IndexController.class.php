@@ -84,6 +84,15 @@ class IndexController extends RestController
         $usermodel = D('user');
         $data = I("post.");
         $username = $data['username'];
+        //检查用户是否存在
+        if(!$usermodel->where(array("username"=>$username))->find())
+        {
+           $str = array(
+               'code'   =>  '201',
+               'msg'    =>  '该用户不存在'
+           );
+           exit(json_encode($str));
+        }
         
         //验证手机号
         $cellphone = isset($data['cellphone'])?$data['cellphone']:'';
@@ -126,8 +135,8 @@ class IndexController extends RestController
             $oldimg = $usermodel->field("avatar")->where(array("username" => $username))->find();
             if($oldimg['avatar']){
                 $image = new \Think\Image();
-                $image->open($oldimg['avatar']);
-                unlink($_SERVER['DOCUMENT_ROOT'].$oldimg['avatar']);
+                $image->open($oldimg['avatar']);   
+                unlink($_SERVER['DOCUMENT_ROOT'].'/'.$oldimg['avatar']);
             }
             
             //解码并把图片放在服务器上
@@ -141,6 +150,9 @@ class IndexController extends RestController
                 }
 
             }
+            //将图片存到服务器上
+            $imgname = time();
+            file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
             //将新的图片路径放到数据库中
             $data['avatar'] = $imgpath.$imgname.".jpg"; 
         }
@@ -160,10 +172,7 @@ class IndexController extends RestController
                 'data' =>  $data,
                 "code"  => "200",
                 "msg"   =>  "修改成功"
-            );
-            //将图片存到服务器上
-            $imgname = time();
-            file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
+            );    
             exit(json_encode($str));
         }else{
              $str = array(
