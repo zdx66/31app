@@ -127,7 +127,7 @@ class IndexController extends RestController
             if($oldimg['avatar']){
                 $image = new \Think\Image();
                 $image->open($oldimg['avatar']);
-                unlink($oldimg['avatar']);
+                unlink("/var/www/31app/".$oldimg['avatar']);
             }
             
             //解码并把图片放在服务器上
