@@ -263,13 +263,12 @@ class IndexController extends RestController
             {         
                 echo "无法创建该路径";
             }
-        }
-
+        }  
         foreach($data as $v=>$k)
         {
-            $time = date("M-d",time);
-            file_put_contents($imgpath_1.$user_id.'_'.$v.'.jpg', $k,FILE_USE_INCLUDE_PATH);
-            $data[$v] = $imgpath_1.$user_id.'_'.$v.'.jpg';
+            $allPath = $imgpath_1.$user_id.'_'.rand(0, 20).'_';
+            file_put_contents($allPath.$v.'.jpg', $k,FILE_USE_INCLUDE_PATH);
+            $data[$v] = $allPath.$v.'.jpg';
         }
         $res = $user_profile_model->where(array("user_id"=>$user_id))->setField($data);
         if(!$res)
@@ -281,6 +280,7 @@ class IndexController extends RestController
             );
             exit(json_encode($str));
         }
+        
         $data['user_id'] = $user_id;
         $str = array(
             'data'  =>  $data,
