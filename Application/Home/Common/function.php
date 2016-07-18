@@ -32,21 +32,19 @@ function is_email($email = '')
     return FALSE;
 }
 
-//将图片解码并存到数据库，服务器中
-function deal_image($avatar)
+//base64解码
+function base64_decode_img($file)
 {
-            //把图片放在服务器上
-            $time = date("Y-m", time());
-            $imgpath = $_SERVER['DOCUMENT_ROOT'].'/'."Public/Uploads/".$time.'/';
-            if(!is_dir($imgpath)){
-                if(!mkdir($imgpath,0777,true))
-                {         
-                    echo "无法创建该路径";
-                }
-            }
-            //将图片存到服务器上
-            $imgname = time();
-            file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
-            //将新的图片路径放到数据库中
-            $data['avatar'] = $imgpath.$imgname.".jpg";
+    $file  =   substr($file, strpos($file, ",")+1);
+    if(!is_base64_encoded($file)){
+        $str = "非约定编码格式";
+        return $str;
+    }
+    $file = base64_decode(str_replace(" ","+",$file));
+    return $file;
+}
+
+function del_old_img($imgpath)
+{
+    
 }
