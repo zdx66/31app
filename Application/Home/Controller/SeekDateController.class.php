@@ -27,6 +27,7 @@ class SeekDateController extends Controller{
                 ->order('user.id desc')
                 ->page($page,15)
                 ->select();
+        echo $userinfomodel->getLastSql();
         //等待觅约--冻结节操币
         if($mode == 9){
             $datamodel = M("UserData");
