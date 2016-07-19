@@ -62,13 +62,37 @@ class SeekDateController extends Controller{
 
     }
     
-    //查看妹子/帅哥主页中心
+    //用户主页
     function look_target_info()
     {
         $user_id = isset($_GET['user_id'])?$_GET['user_id']:'';
-        $target_user_id = isset($_GET['someone_id'])?$_GET['someone_id']:'';
-        //$datamodel = 
-        //
+        //$username = isset($_GET['username'])?$_GET['username']:'';
+        $model = D("user");
+        $info = $model
+                ->alias('user')
+                ->join('left join __USER_DATA__ as data on (user.id = data.user_id)')
+                ->field('id,sex,rank,status,avatar,hx_pwd,mode,jiecao_coin,appion_time,following_count,follower_count,viscosity,levels,sex_skill,lan_skill,appearance')
+                ->where()
+                ->find();
+        if(!$info){
+            $str = array(
+                'code'  =>  '201',
+                'msg'   =>  '信息查询失败'
+            );
+            exit(json_encode($str));
+        }
+        $info['charm'] = $info['viscosity']+$info['levels']+$info['sex_skill']+$info['lan_skill']+$info['appearance'];
+        if($info['charm']<600)
+        {
+            $info['charm'] = 600;
+        }
+        $str = array(
+            'data'  =>  $info,
+            'code'  =>  200,
+            'msg'   =>  '成功'
+        );    
+        exit(json_encode($str));
+
     }
     
 
