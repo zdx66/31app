@@ -63,7 +63,7 @@ class SeekDateController extends Controller{
     }
     
     //用户主页
-    function look_target_info()
+    function self_info()
     {
         $user_id = isset($_GET['user_id'])?$_GET['user_id']:'';
         //$username = isset($_GET['username'])?$_GET['username']:'';
@@ -72,7 +72,7 @@ class SeekDateController extends Controller{
                 ->alias('user')
                 ->join('left join __USER_DATA__ as data on (user.id = data.user_id)')
                 ->field('id,sex,rank,status,avatar,hx_pwd,mode,jiecao_coin,appion_time,following_count,follower_count,viscosity,levels,sex_skill,lan_skill,appearance')
-                ->where()
+                ->where(array("user_id"=>$user_id))
                 ->find();
         if(!$info){
             $str = array(
@@ -95,5 +95,35 @@ class SeekDateController extends Controller{
 
     }
     
+    
+    //他人主页
+    function some_info()
+    {
+        $user_id = isset($_GET['user_id'])?$_GET['user_id']:'';
+        //$username = isset($_GET['username'])?$_GET['username']:'';
+        $model = D("user");
+        $info = $model
+                ->alias('user')
+                ->join('left join __USER_DATA__ as data on (user.id = data.user_id)')
+                ->join('left join __USER_PROFILE__ as pro on (user.id = pro.user_id')
+                ->field('id,sex,rank,status,avatar,mode,,following_count,file_1,file_2,file_3,file_4,file_5,birthdate,signature,address,address_1,address_2,address_3,self_mark,mark,height,weight')
+                ->where(array("user_id"=>$user_id))
+                ->find();
+        echo $model->getLastSql();
+        if(!$info){
+            $str = array(
+                'code'  =>  '201',
+                'msg'   =>  '信息查询失败'
+            );
+            exit(json_encode($str));
+        }else{
+            $str = array(
+                'data'  =>  $info,
+                'code'  =>  200,
+                'msg'   =>  '成功'
+            );    
+            exit(json_encode($str));
+        }
+    }
 
 }
