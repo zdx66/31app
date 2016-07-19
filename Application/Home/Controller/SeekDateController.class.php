@@ -74,7 +74,6 @@ class SeekDateController extends Controller{
                 ->field('id,sex,rank,status,avatar,hx_pwd,mode,jiecao_coin,appion_time,following_count,follower_count,viscosity,levels,sex_skill,lan_skill,appearance')
                 ->where()
                 ->find();
-        echo $model->getLastSql();
         if(!$info){
             $str = array(
                 'code'  =>  '201',
