@@ -27,13 +27,12 @@ class SeekDateController extends Controller{
                 ->order('user.id desc')
                 ->page($page,15)
                 ->select();
-        //echo $userinfomodel->getLastSql();
         //等待觅约--冻结节操币
         if($mode == 9){
             $datamodel = M("UserData");
             $info = $datamodel->field('jiecao_coin,frozen_jiecao_coin')->where(array('user_id'=>$user_id))->find();
             if($info['jiecao_coin']<$coin){
-                $warning = "节操币余额不足";  
+                $warning = "节操币余额不足，请先充值";  
             }elseif ($info['jiecao_coin']<100) {
                 $warning = '节操币余额少于100，可以去充值了';
             }else{
