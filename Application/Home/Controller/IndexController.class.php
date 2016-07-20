@@ -73,7 +73,6 @@ class IndexController extends RestController
         $id = $user->add(array('username'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'sex'=>$sex,'created_at'=>$t,'status'=>10));
         $usr = $userData->add(array('user_id'=>$id));
         $usrp = $userProfile->add(array('user_id'=>$id,'birthdate'=>$birthdate,'file_1'=>$file_1));
-        echo $userProfile->getLastSql();
         $url = C('URL') . "/users";
         $token = $this->Index();
         if($id && $usr && $usrp){ 
