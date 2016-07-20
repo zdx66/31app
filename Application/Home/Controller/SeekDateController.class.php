@@ -68,32 +68,33 @@ class SeekDateController extends Controller{
         //用户id
         $id = I('get.id');
         //觅约对象id
-        $user_id = I('get.user_id');
-        //点赞
-        $is_good = I('get.is_good');
-        $user = D('user');
-        if($is_good){
-            $userdata = D('UserData');
-            //给觅约对象加人气
-            $res1 = $userdata->where(array('user_id'=>$user_id))->setInc("following_count");
-            
-            //用户给觅约对象加关注
-            $res2 = $userdata->where(array('user_id'=>$id))->setInc("follower_count"); 
-            echo $userdata->getLastSql();
-        }
+        $user_id = I('get.user_id');   
         if(!$user_id){
             $str = array(
                 'code'  =>  '201',
                 'msg'   =>  'user_id不能为空'
             );
-            exit($str);
+            exit(json_encode($str));
+        }
+        
+        //点赞
+        $is_good = I('get.is_good');
+        $user = D('user');
+        if($is_good){
+            $pro = D('UserProfile');
+            $res = $pro->where(array('user_id'=>$user_id))->setInc("number");
+            if($res){
+                $was_dianzan = "已给被查看用户点赞";
+            }else{
+                $was_dianzan = "没有给查看的用户点赞";
+            }
         }
         
         $info = $user
                 ->alias('user')
                 ->join('left join __USER_DATA__ as data on (user.id = data.user_id)')
                 ->join('left join __USER_PROFILE__ as pro on ( user.id = pro.user_id)')
-                ->field("user.id,nickname,mode,sex,need_coin,file_1,file_2,file_3,birthdate,signature,address,self_mark,mark,hobby,height,weight,constellation")
+                ->field("user.id,nickname,mode,sex,need_coin,file_1,file_2,file_3,birthdate,signature,address,self_mark,mark_friend,mark,hobby,height,weight,constellation")
                 ->where(array('user.id'=>$user_id))
                 ->find();
         if(!$info){
@@ -101,12 +102,13 @@ class SeekDateController extends Controller{
                 'code'  =>  '201',
                 'msg'   =>  '用户信息查询失败'
             );
-            exit($str);
+            exit(json_encode($str));
         }
         $str = array(
             'code'  =>  '200',
             'data'  =>  $info,
             'id'    =>  $id,
+            'dianzan'   =>  $was_dianzan,
             'msg'   =>  '成功'
         );
         exit(json_encode($str));
