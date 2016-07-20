@@ -110,7 +110,6 @@ class IndexController extends RestController
         
         $usermodel = D('user');
         $data = I("post.");
-        $user_id = $data['user_id'];
         $username = $data['username'];
         //检查用户是否存在
         if(!$usermodel->where(array("username"=>$username))->find())
@@ -148,22 +147,21 @@ class IndexController extends RestController
         }
         
         //查看用户是否已经有头像，有的话先删除服务器原来的图片
-        $data['file_1']  =   isset($data['file_1'])?$data['file_1']:'';
-        $data['file_1']  =   substr($data['file_1'], strpos($data['file_1'], ",")+1);
-        if(!is_base64_encoded($data['file_1'])){
+        $data['avatar']  =   isset($data['avatar'])?$data['avatar']:'';
+        $data['avatar']  =   substr($data['avatar'], strpos($data['avatar'], ",")+1);
+        if(!is_base64_encoded($data['avatar'])){
             $str = array(
                 'code'  =>  '201',
                 'msg'   =>  '传过来的头像不是约定的编码'
             );
             exit(json_encode($str));
         }  
-        $data['file_1'] = base64_decode(str_replace(" ","+",$data['file_1']));
-        $pro = D('UserProfile');
-        $oldimg = $pro->field("file_1")->where(array("user_id" => $user_id))->find();
-        if($data['file_1'] && $oldimg['file_1']){
+        $data['avatar'] = base64_decode(str_replace(" ","+",$data['avatar']));
+        $oldimg = $usermodel->field("avatar")->where(array("username" => $username))->find();
+        if($data['avatar'] && $oldimg['avatar']){
            //数据库中存在头像且传入了新图片，先删除服务器上的图片
-            if($oldimg['file_1'] !== $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg'){ 
-                @unlink($oldimg['file_1']);
+            if($oldimg['avatar'] !== $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg'){ 
+                @unlink($oldimg['avatar']);
             }
             //把图片放在服务器上
             $time = date("Y-m", time());
@@ -176,12 +174,12 @@ class IndexController extends RestController
             }
             //将图片存到服务器上
             $imgname = time();
-            file_put_contents ($imgpath.$imgname.".jpg", $data['file_1'], FILE_USE_INCLUDE_PATH);
+            file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
             //将新的图片路径放到数据库中
-            $data['file_1'] = $imgpath.$imgname.".jpg";
+            $data['avatar'] = $imgpath.$imgname.".jpg";
            
-        }else if($data['file_1'] && !$oldimg['file_1']){
-            //传入新图片，但数据库中还没有图片，把填入的图片解码
+        }else if($data['avatar'] && !$oldimg['avatar']){
+            //传入新图片，但数据库中还没有图片，把传入的图片解码
 
             //把图片放在服务器上
             $time = date("Y-m", time());
@@ -194,13 +192,13 @@ class IndexController extends RestController
             }
             //将图片存到服务器上
             $imgname = time();
-            file_put_contents ($imgpath.$imgname.".jpg", $data['file_1'], FILE_USE_INCLUDE_PATH);
+            file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
             //将新的图片路径放到数据库中
-            $data2['file_1'] = $imgpath.$imgname.".jpg";   
+            $data['avatar'] = $imgpath.$imgname.".jpg";   
             
-        }else if(!$data['file_1'] && !$oldimg['file_1']){
+        }else if(!$data['avatar'] && !$oldimg['avatar']){
             //没传图片，数据库也没有图片，给一个默认的图片
-            $data2['file_1'] = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg';
+            $data['avatar'] = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg';
         }     
         //数据更改的时间
         $time = time();
@@ -210,7 +208,7 @@ class IndexController extends RestController
         $result = $usermodel
                 ->where(array("username"=>$username))
                 ->setfield($data);
-        $result = $pro->where(array("user_id"=>$user_id))->setField($data2);
+        //$result = $pro->where(array("user_id"=>$user_id))->setField($data2);
         if($result)
         {
             $data['username'] = $username;
