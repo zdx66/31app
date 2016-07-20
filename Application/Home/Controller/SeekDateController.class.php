@@ -94,7 +94,7 @@ class SeekDateController extends Controller{
                 ->alias('user')
                 ->join('left join __USER_DATA__ as data on (user.id = data.user_id)')
                 ->join('left join __USER_PROFILE__ as pro on ( user.id = pro.user_id)')
-                ->field("user.id,nickname,mode,sex,need_coin,file_1,file_2,file_3,birthdate,signature,address,self_mark,mark_friend,mark,hobby,height,weight,constellation")
+                ->field("user.id,avatar,nickname,mode,sex,need_coin,file_1,file_2,file_3,birthdate,signature,address,self_mark,mark_friend,mark,hobby,height,weight,constellation")
                 ->where(array('user.id'=>$user_id))
                 ->find();
         if(!$info){
