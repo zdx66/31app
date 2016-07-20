@@ -75,11 +75,11 @@ class SeekDateController extends Controller{
         if($is_good){
             $userdata = D('UserData');
             //给觅约对象加人气
-            $res1 = $userdata->where(array('user_id'=>65))->setInc("following_count");
+            $res1 = $userdata->where(array('user_id'=>$user_id))->setInc("following_count");
             
             //用户给觅约对象加关注
             $res2 = $userdata->where(array('user_id'=>$id))->setInc("follower_count"); 
-            //echo $userdata->getLastSql();
+            echo $userdata->getLastSql();
         }
         if(!$user_id){
             $str = array(
