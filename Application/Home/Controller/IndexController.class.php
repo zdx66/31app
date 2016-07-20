@@ -23,31 +23,57 @@ class IndexController extends RestController
      */
     function hx_register()
     {  
-        $name = $_POST['username'];
-        $pwd = $_POST['password'];
-        if($name == null || $pwd ==null){
-            $data= array('msg'=>'用户名或密码不为空');
+        $username = I('post.username');
+        $pwd = I('post.password');
+        $password = md5(md5($pwd));
+        $nickname = I('post.nickname');
+        $sex = I('post.sex');
+        $birthdate = I('post.birthdate');
+        $file_1 = I('post.file_1');
+        if($username == null || $pwd ==null || $nickname == null || $sex == null || $birthdate == null || $file_1 == null){
+            $data= array('msg'=>'所填各项都不能为空，请重新输入');
             exit(json_encode($data));
         }
-        $username = $name;
-        $password = md5(md5($pwd));
-        $nickname = $name;
+        if($sex == 1){
+            $sex = 'male';
+        }elseif($sex == 2){
+            $sex = 'female';
+        }
+        //上传用户头像/档案照
+        
+        if($file_1){
+            $file_1 = base64_decode_img($file_1);
+        }
+        //组装图片存储路径
+        $time = date("Y-m",time());
+        $imgpath = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/'.$time.'/';
+        if(!is_dir($imgpath)){
+            if(!mkdir($imgpath,0777,true))
+            {         
+                echo "无法创建该路径";
+            }
+        }  
+        $imgname = time();
+        file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
+        //将新的图片路径放到数据库中
+        $file_1 = $imgpath.$imgname.".jpg";
         $user = D('User'); 
         $userData = D('UserData');
         $userProfile = D('UserProfile');
         $res = $user->field('id')->where(array('username '=>$username))->find();
         if($res){
             $result = array(   
-            'flag' => 'error',   
+            'code' => '201',   
             'msg' => '用户名已存在',   
             'data' =>$username  
                 ); 
             exit(json_encode($result));
         }
-        $time = time();
-        $id = $user->add(array('username'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'created_at'=>$time,'status'=>10));
+        $t = time();
+        $id = $user->add(array('username'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'sex'=>$sex,'created_at'=>$t,'status'=>10));
         $usr = $userData->add(array('user_id'=>$id));
-        $usrp = $userProfile->add(array('user_id'=>$id));
+        $usrp = $userProfile->add(array('user_id'=>$id,'birthdate'=>$birthdate,'file_1'=>$file_1));
+        //echo $userProfile->getLastSql();
         $url = C('URL') . "/users";
         $token = $this->Index();
         if($id && $usr && $usrp){ 
