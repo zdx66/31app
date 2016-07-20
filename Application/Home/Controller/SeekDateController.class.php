@@ -97,13 +97,16 @@ class SeekDateController extends Controller{
                 ->field("user.id,nickname,mode,sex,need_coin,file_1,file_2,file_3,birthdate,signature,address,self_mark,mark_friend,mark,hobby,height,weight,constellation")
                 ->where(array('user.id'=>$user_id))
                 ->find();
-        echo $user->getLastSql();
         if(!$info){
             $str = array(
                 'code'  =>  '201',
                 'msg'   =>  '用户信息查询失败'
             );
             exit(json_encode($str));
+        }
+        if($info['need_coin']<70)
+        {
+            $info['need_coin']=70;
         }
         $str = array(
             'code'  =>  '200',
