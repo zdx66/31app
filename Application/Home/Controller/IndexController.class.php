@@ -4,7 +4,7 @@ use Think\Controller\RestController;
 class IndexController extends RestController
  {
     /*
-     * 获取APP管理员Token
+     * 获取APP管理员Token 
      */
     function Index()
     {
@@ -209,6 +209,10 @@ class IndexController extends RestController
         $data = I("post.");
         $user_id = $data['user_id'];
         unset($data['user_id']);
+        //如果是女性，必须要有need_coin值
+        if($data['sex'] == 2){
+            $data['need_coin'] = empty($data['need_coin'])?70:$data['need_coin'];
+        }
         $res = $userdata_model->where(array("user_id"=>$user_id))->setField($data);
         if(!$res){
             $str = array(
