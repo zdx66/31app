@@ -108,11 +108,31 @@ class IndexController extends RestController
      */
     function update_user_info(){
         
+        //获取原来的旧数据
         $usermodel = D('user');
         $data = I("post.");
+        $user_id = $data['user_id'];
+        $info = $usermodel
+                ->alias('user')
+                ->join('left join __USER_DATA__ as data on (user.id = data.user_id)')
+                ->join('left join __USER_PROFILE__ as pro on (user.id = pro.user_id)')
+                ->where(array('user.id'=>$user_id))
+                ->find();
+        //标签
+        $label = D("label");
+        $labelinfo = $label->field("id,labelname")->where("")->select();
+        //地区
+        $area = D('address');
+        $areaInfo = $area->field('id,addrname,pid')->where('')->select();
         $username = $data['username'];
+        $str = array(
+            'userinfo'  =>  $info,
+            'label_list'     =>  $labelinfo,
+            'area_list'      =>  $labelinfo
+        );
+        echo json_encode($str);
         //检查用户是否存在
-        if(!$usermodel->where(array("username"=>$username))->find())
+        if(!$usermodel->where(array("id"=>$user_id))->find())
         {
            $str = array(
                'code'   =>  '201',
@@ -132,7 +152,7 @@ class IndexController extends RestController
                 exit(json_encode($str));
             }
         }
-
+        unset($data['user_id']);
         //验证邮箱格式
         $email = isset($data['email'])?$data['email']:'';
         if($email){
@@ -208,7 +228,6 @@ class IndexController extends RestController
         $result = $usermodel
                 ->where(array("username"=>$username))
                 ->setfield($data);
-        //$result = $pro->where(array("user_id"=>$user_id))->setField($data2);
         if($result)
         {
             $data['username'] = $username;
