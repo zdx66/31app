@@ -39,8 +39,19 @@ class IndexController extends RestController
         }elseif($sex == 2){
             $sex = 'female';
         }
+        //限制年龄到18岁以上
+        $birthdate = time()-strtotime($birthdate);
+        $userage =  number_format($birthdate/(3600*24*365),1);
+        if($userage<18){
+            $str = array(
+                'code'  =>  '201',
+                'age'   =>  $userage.'岁',
+                'msg'   =>  '不好意思，年龄太小了'
+            );
+            exit(json_encode($str));
+        }
+
         //上传用户头像/档案照
-        
         if($file_1){
             $file_1 = base64_decode_img($file_1);
         }
@@ -103,6 +114,46 @@ class IndexController extends RestController
         return $this->curl($url, $data, $header, "POST");
     }
     
+     /*
+     * 修改用户昵称
+     * $username, $nickname
+     */
+    public function hx_user_update_nickname()
+    {
+        $GetPutData = file_get_contents("php://input");
+        $GetPutData = explode("&", $GetPutData);
+        //用户名
+        $GetPutData[0] = explode("=", $GetPutData[0] );
+        $username = $GetPutData[0][1];
+        //密码
+        $GetPutData[1] = explode("=", $GetPutData[1]);
+        $nickname = $GetPutData[1][1];
+        if($username == null || $nickname == null)
+        {
+            exit(json_encode("用户名或密码不能为空"));
+        }
+        $time = time();
+        $data = array('nickname'=>$nickname,'update_at'=>$time);
+        $user = D('user');
+        //更改数据库昵称
+        $result = $user->where(array('username'=>$username))->setField($data);
+        $url = C('URL') . "/users/${username}";
+        $token = $this->Index();
+        $header = array(
+            'Authorization: Bearer ' . $token
+        );
+        if($result)
+        {
+            $str = array('data'=>$data,'code'=>'200',"header"=>$header);
+            echo json_encode($str);
+        }else{
+            $str = array('code'=>'201','msg'=>"昵称更改失败");
+            exit(json_encode($str));
+        }
+        //更改环信昵称
+        return $this->curl($url, $data, $header, "PUT");
+    }
+    
     /**
      * 修改个人基本信息接口
      */
@@ -112,6 +163,7 @@ class IndexController extends RestController
         $usermodel = D('user');
         $data = I("post.");
         $user_id = $data['user_id'];
+        $data2['work'] = $data['work'];
         $info = $usermodel
                 ->alias('user')
                 ->join('left join __USER_DATA__ as data on (user.id = data.user_id)')
@@ -130,7 +182,8 @@ class IndexController extends RestController
             'label_list'     =>  $labelinfo,
             'area_list'      =>  $labelinfo
         );
-        echo json_encode($str);
+        //echo json_encode($str);
+        
         //检查用户是否存在
         if(!$usermodel->where(array("id"=>$user_id))->find())
         {
@@ -153,6 +206,10 @@ class IndexController extends RestController
             }
         }
         unset($data['user_id']);
+        unset($data['nickname']);
+        unset($data['sex']);
+        unset($data['work']);
+        unset($data['update_at']);
         //验证邮箱格式
         $email = isset($data['email'])?$data['email']:'';
         if($email){
@@ -166,6 +223,47 @@ class IndexController extends RestController
             }
         }
         
+        //更改用户档案照
+        $da[0]['file_1'] = isset($data['file_1'])?$data['file_1']:'';
+        $da[0]['file_2'] = isset($data['file_2'])?$data['file_2']:'';
+        $da[0]['file_3'] = isset($data['file_3'])?$data['file_3']:'';
+        $da[0]['file_4'] = isset($data['file_4'])?$data['file_4']:'';
+        $da[0]['file_5'] = isset($data['file_5'])?$data['file_5']:'';
+        
+        foreach ($da[0] as $v=>$k){
+            if($data[$v]){
+                $data[$v] = base64_decode_img($data[$v]);
+                $arr[$v] = $v;
+            }           
+        }
+        //删除旧图片
+        $user_profile_model = D('UserProfile');
+        $oldimg_1 = $user_profile_model->field($arr)->where(array("user_id" => $user_id))->find();
+        foreach($oldimg_1 as $v)
+        {
+            @unlink($v);
+        }
+        //将图片存放到服务器上
+        $t = date("Y-m",time());
+        $imgpath_1 = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/'.$t.'/';
+        if(!is_dir($imgpath_1)){
+            if(!mkdir($imgpath_1,0777,true))
+            {         
+                echo "无法创建该路径";
+            }
+        }  
+        
+        foreach($arr as $v=>$k)
+        {
+            if($v){
+                $allPath = $imgpath_1.$user_id.'_'.rand(0, 20).'_';
+                file_put_contents($allPath.$v.'.jpg', $k,FILE_USE_INCLUDE_PATH);
+                $data[$v] = $allPath.$v.'.jpg';
+            }
+            
+        }
+        
+        /*
         //查看用户是否已经有头像，有的话先删除服务器原来的图片
         $data['avatar']  =   isset($data['avatar'])?$data['avatar']:'';
         $data['avatar']  =   substr($data['avatar'], strpos($data['avatar'], ",")+1);
@@ -219,20 +317,24 @@ class IndexController extends RestController
         }else if(!$data['avatar'] && !$oldimg['avatar']){
             //没传图片，数据库也没有图片，给一个默认的图片
             $data['avatar'] = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg';
-        }     
+        }  
+         * 
+         */   
         //数据更改的时间
         $time = time();
-        $data['update_at'] = $time;
-        unset($data['username']);
+        $data2['update_at'] = $time;
+        unset($data['user_id']);
         //更新用户信息
-        $result = $usermodel
-                ->where(array("username"=>$username))
+        $result = $user_profile_model
+                ->where(array("user_id"=>$user_id))
                 ->setfield($data);
-        if($result)
+        $result2 = $usermodel->where(array("id"=>$user_id))->setField($data2);
+        if($result&&$result2)
         {
             $data['username'] = $username;
             $str = array(
                 'data' =>  $data,
+                'data2'=>  $data2,
                 "code"  => "200",
                 "msg"   =>  "修改成功"
             );    
@@ -603,45 +705,7 @@ class IndexController extends RestController
         );
         return $this->curl($url, "", $header, "DELETE");
     }
-    /*
-     * 修改用户昵称
-     * $username, $nickname
-     */
-    public function hx_user_update_nickname()
-    {
-        $GetPutData = file_get_contents("php://input");
-        $GetPutData = explode("&", $GetPutData);
-        //用户名
-        $GetPutData[0] = explode("=", $GetPutData[0] );
-        $username = $GetPutData[0][1];
-        //密码
-        $GetPutData[1] = explode("=", $GetPutData[1]);
-        $nickname = $GetPutData[1][1];
-        if($username == null || $nickname == null)
-        {
-            exit(json_encode("用户名或密码不能为空"));
-        }
-        $time = time();
-        $data = array('nickname'=>$nickname,'update_at'=>$time);
-        $user = D('user');
-        //更改数据库昵称
-        $result = $user->where(array('username'=>$username))->setField($data);
-        $url = C('URL') . "/users/${username}";
-        $token = $this->Index();
-        $header = array(
-            'Authorization: Bearer ' . $token
-        );
-        if($result)
-        {
-            $str = array('data'=>$data,'code'=>'200',"header"=>$header);
-            echo json_encode($str);
-        }else{
-            $str = array('code'=>'201','msg'=>"昵称更改失败");
-            exit(json_encode($str));
-        }
-        //更改环信昵称
-        return $this->curl($url, $data, $header, "PUT");
-    }
+   
     /*
      *
      * curl
