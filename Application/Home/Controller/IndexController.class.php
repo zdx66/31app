@@ -155,7 +155,7 @@ class IndexController extends RestController
     }
     
     /**
-     * 修改个人基本信息接口
+     * 修改个人信息接口
      */
     function update_user_info(){
         
@@ -182,7 +182,7 @@ class IndexController extends RestController
             'label_list'     =>  $labelinfo,
             'area_list'      =>  $labelinfo
         );
-        echo json_encode($str);
+        //echo json_encode($str);
         
         //检查用户是否存在
         if(!$usermodel->where(array("id"=>$user_id))->find())
@@ -237,26 +237,33 @@ class IndexController extends RestController
             }
         }
         
-        //更改用户档案照
+        //判断是否更改更改用户头像或更改用户档案照
         $da[0]['file_1'] = isset($data['file_1'])?$data['file_1']:'';
         $da[0]['file_2'] = isset($data['file_2'])?$data['file_2']:'';
         $da[0]['file_3'] = isset($data['file_3'])?$data['file_3']:'';
         $da[0]['file_4'] = isset($data['file_4'])?$data['file_4']:'';
         $da[0]['file_5'] = isset($data['file_5'])?$data['file_5']:'';
-        
+        $da[0]['avatar'] = isset($data['avatar'])?$data['avatar']:'';
         foreach ($da[0] as $v=>$k){
             if($data[$v]){
                 $data[$v] = base64_decode_img($data[$v]);
                 $arr[$v] = $v;
             }           
         }
+        //如果传过来了头像
         //删除旧图片
         $user_profile_model = D('UserProfile');
-        $oldimg_1 = $user_profile_model->field($arr)->where(array("user_id" => $user_id))->find();
+        $oldimg_1 = $user_profile_model
+                ->alias("pro")
+                ->join('left join __USER__ as user on (user.id=pro.user_id)')
+                ->field($arr)
+                ->where(array("user_id" => $user_id))
+                ->find();
         foreach($oldimg_1 as $v)
         {
             @unlink($v);
         }
+        
         //将图片存放到服务器上
         $t = date("Y-m",time());
         $imgpath_1 = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/'.$t.'/';
@@ -266,7 +273,7 @@ class IndexController extends RestController
                 echo "无法创建该路径";
             }
         }  
-        
+
         foreach($arr as $v=>$k)
         {
             if($v){
@@ -274,19 +281,20 @@ class IndexController extends RestController
                 file_put_contents($allPath.$v.'.jpg', $k,FILE_USE_INCLUDE_PATH);
                 $data[$v] = $allPath.$v.'.jpg';
             }
-            
         }
-        
-        
+
         //数据更改的时间
         $time = time();
         $data2['update_at'] = $time;
+        $data2['avatar'] = $data['avatar'];
+        unset($data['avatar']);
         unset($data['user_id']);
         //更新用户信息
         $result = $user_profile_model
                 ->where(array("user_id"=>$user_id))
                 ->setfield($data);
         $result2 = $usermodel->where(array("id"=>$user_id))->setField($data2);
+        //echo $usermodel->getLastSql();
         if($result&&$result2)
         {
             $data['username'] = $username;
