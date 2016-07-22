@@ -55,13 +55,13 @@ class TrendsController extends Controller{
                 'data'  =>  $data,
                 'msg'   =>  '动态发表成功'
             );
-            //exit(json_encode($str));
+            exit(json_encode($str));
         }
         $str = array(
             'code'  =>  '201',
             'msg'   =>  '动态发表失败'
         );
-        //exit(json_encode($str));
+        exit(json_encode($str));
     }
     
     //动态列表
