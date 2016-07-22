@@ -396,7 +396,7 @@ class IndexController extends RestController
     
     /**
      * 更新用户扩展信息接口
-     */
+     
     function user_profile_info()
     {
         $user_profile_model = D("UserProfile");
@@ -455,7 +455,7 @@ class IndexController extends RestController
             'msg'   =>  '操作成功'
         );
         exit(json_encode($str));
-    }
+    }*/
       
     /*
      * 给IM用户的添加好友 $owner_username, $friend_username
@@ -562,6 +562,13 @@ class IndexController extends RestController
                 ->field("*")
                 ->where(array("username" => $username))
                 ->find();
+        //标签
+        $label = D("label");
+        $labelinfo = $label->field("id,labelname")->where("")->select();
+        //地区
+        $area = D('address');
+        $areaInfo = $area->field('id,addrname,pid')->where('')->select();
+        
         if(!$result){
             $data = array(
                 "code"  =>  "201",
@@ -577,6 +584,8 @@ class IndexController extends RestController
         //将用户信息返回给客户端
         $str = array(
             "data"  => $result,
+            'labelList' =>  $labelinfo,
+            'areaList'  =>  $areaInfo,
             "code"  => "200",
             "header"    => $header
         );
