@@ -182,7 +182,7 @@ class IndexController extends RestController
             'label_list'     =>  $labelinfo,
             'area_list'      =>  $labelinfo
         );
-        //echo json_encode($str);
+        echo json_encode($str);
         
         //检查用户是否存在
         if(!$usermodel->where(array("id"=>$user_id))->find())
@@ -205,6 +205,20 @@ class IndexController extends RestController
                 exit(json_encode($str));
             }
         }
+        
+        //检验年龄
+        $birthdate = $data['birthdate'];
+        $birthdate = time()-strtotime($birthdate);
+        $userage =  number_format($birthdate/(3600*24*365),1);
+        if($userage<18){
+            $str = array(
+                'code'  =>  '201',
+                'age'   =>  $userage.'岁',
+                'msg'   =>  '不好意思，年龄太小了'
+            );
+            exit(json_encode($str));
+        }
+        
         unset($data['user_id']);
         unset($data['nickname']);
         unset($data['sex']);
