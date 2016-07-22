@@ -277,63 +277,7 @@ class IndexController extends RestController
             
         }
         
-        /*
-        //查看用户是否已经有头像，有的话先删除服务器原来的图片
-        $data['avatar']  =   isset($data['avatar'])?$data['avatar']:'';
-        $data['avatar']  =   substr($data['avatar'], strpos($data['avatar'], ",")+1);
-        if(!is_base64_encoded($data['avatar'])){
-            $str = array(
-                'code'  =>  '201',
-                'msg'   =>  '传过来的头像不是约定的编码'
-            );
-            exit(json_encode($str));
-        }  
-        $data['avatar'] = base64_decode(str_replace(" ","+",$data['avatar']));
-        $oldimg = $usermodel->field("avatar")->where(array("username" => $username))->find();
-        if($data['avatar'] && $oldimg['avatar']){
-           //数据库中存在头像且传入了新图片，先删除服务器上的图片
-            if($oldimg['avatar'] !== $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg'){ 
-                @unlink($oldimg['avatar']);
-            }
-            //把图片放在服务器上
-            $time = date("Y-m", time());
-            $imgpath = $_SERVER['DOCUMENT_ROOT'].'/'."Public/Uploads/".$time.'/';
-            if(!is_dir($imgpath)){
-                if(!mkdir($imgpath,0777,true))
-                {         
-                    echo "无法创建该路径";
-                }
-            }
-            //将图片存到服务器上
-            $imgname = time();
-            file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
-            //将新的图片路径放到数据库中
-            $data['avatar'] = $imgpath.$imgname.".jpg";
-           
-        }else if($data['avatar'] && !$oldimg['avatar']){
-            //传入新图片，但数据库中还没有图片，把传入的图片解码
-
-            //把图片放在服务器上
-            $time = date("Y-m", time());
-            $imgpath = $_SERVER['DOCUMENT_ROOT'].'/'."Public/Uploads/".$time.'/';
-            if(!is_dir($imgpath)){
-                if(!mkdir($imgpath,0777,true))
-                {         
-                    echo "无法创建该路径";
-                }
-            }
-            //将图片存到服务器上
-            $imgname = time();
-            file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
-            //将新的图片路径放到数据库中
-            $data['avatar'] = $imgpath.$imgname.".jpg";   
-            
-        }else if(!$data['avatar'] && !$oldimg['avatar']){
-            //没传图片，数据库也没有图片，给一个默认的图片
-            $data['avatar'] = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg';
-        }  
-         * 
-         */   
+        
         //数据更改的时间
         $time = time();
         $data2['update_at'] = $time;

@@ -43,8 +43,3 @@ function base64_decode_img($file)
     $file = base64_decode(str_replace(" ","+",$file));
     return $file;
 }
-
-function del_old_img($imgpath)
-{
-    
-}

@@ -121,15 +121,73 @@ class SeekDateController extends Controller{
     //用户主页
     function self_info()
     {
-        $user_id = isset($_GET['user_id'])?$_GET['user_id']:'';
-        //$username = isset($_GET['username'])?$_GET['username']:'';
-        $model = D("user");
-        $info = $model
+        $usermodel = D("user");
+        $data = I('post.');
+        $user_id = $data['user_id'];
+        $data['avatar'] = $data['avatar'];
+        if($data['avatar']){
+            //查看用户是否已经有头像，有的话先删除服务器原来的图片
+            $data['avatar']  =   substr($data['avatar'], strpos($data['avatar'], ",")+1);
+            if(!is_base64_encoded($data['avatar'])){
+                $str = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '传过来的头像不是约定的编码'
+                );
+                exit(json_encode($str));
+            }  
+            $data['avatar'] = base64_decode(str_replace(" ","+",$data['avatar']));
+            $oldimg = $usermodel->field("avatar")->where(array("id" => $user_id))->find();
+            if($data['avatar'] && $oldimg['avatar']){
+               //数据库中存在头像且传入了新图片，先删除服务器上的图片
+                if($oldimg['avatar'] !== $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg'){ 
+                    @unlink($oldimg['avatar']);
+                }
+                //把图片放在服务器上
+                $time = date("Y-m", time());
+                $imgpath = $_SERVER['DOCUMENT_ROOT'].'/'."Public/Uploads/".$time.'/';
+                if(!is_dir($imgpath)){
+                    if(!mkdir($imgpath,0777,true))
+                    {         
+                        echo "无法创建该路径";
+                    }
+                }
+                //将图片存到服务器上
+                $imgname = time();
+                file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
+                //将新的图片路径放到数据库中
+                $data['avatar'] = $imgpath.$imgname.".jpg";
+
+            }else if($data['avatar'] && !$oldimg['avatar']){
+                //传入新图片，但数据库中还没有图片，把传入的图片解码
+
+                //把图片放在服务器上
+                $time = date("Y-m", time());
+                $imgpath = $_SERVER['DOCUMENT_ROOT'].'/'."Public/Uploads/".$time.'/';
+                if(!is_dir($imgpath)){
+                    if(!mkdir($imgpath,0777,true))
+                    {         
+                        echo "无法创建该路径";
+                    }
+                }
+                //将图片存到服务器上
+                $imgname = time();
+                file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
+                //将新的图片路径放到数据库中
+                $data['avatar'] = $imgpath.$imgname.".jpg";   
+
+            }else if(!$data['avatar'] && !$oldimg['avatar']){
+                //没传图片，数据库也没有图片，给一个默认的图片
+                $data['avatar'] = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg';
+            }
+        }
+        
+        $info = $usermodel
                 ->alias('user')
                 ->join('left join __USER_DATA__ as data on (user.id = data.user_id)')
-                ->field('id,sex,rank,seekid,status,avatar,hx_pwd,mode,jiecao_coin,appion_time,following_count,follower_count,viscosity,levels,sex_skill,lan_skill,appearance')
-                ->where(array("user_id"=>$user_id))
+                ->field('user.id,sex,rank,seekid,status,avatar,hx_pwd,mode,jiecao_coin,appion_time,following_count,follower_count,viscosity,levels,sex_skill,lan_skill,appearance')
+                ->where(array("user.id"=>$user_id))
                 ->find();
+
         if(!$info){
             $str = array(
                 'code'  =>  '201',
@@ -146,9 +204,18 @@ class SeekDateController extends Controller{
             'data'  =>  $info,
             'code'  =>  200,
             'msg'   =>  '成功'
-        );    
-        exit(json_encode($str));
-
+        );
+        echo json_encode($str);
+        //将头像入库
+        $arr[avatar] = $data['avatar'];
+        $res = $usermodel->where(array('id'=>$user_id))->setField($arr);
+        if($res){
+            $Str = array(
+                'code'  =>  '200',
+                'msg'   =>  '头像更新成功'
+            );
+            exit(json_encode($Str));
+        }
     }
     
     
@@ -156,9 +223,11 @@ class SeekDateController extends Controller{
     function some_info()
     {
         //用户id
-        $id = isset($_GET['id'])?$_GET['id']:'';
+        $data = I('post.');
+        $id = $data['id'];
         //他人id
-        $user_id = isset($_GET['user_id'])?$_GET['user_id']:'';
+        $user_id = $data['user_id'];
+        $data['avatar'] = $data['avatar'];
         $model = D("user");
         $info1 = $model
                 ->alias('user')
@@ -187,7 +256,72 @@ class SeekDateController extends Controller{
                 'id'     =>  $id,
                 'msg'    =>  '成功'
             );    
-            exit(json_encode($str));
+            echo(json_encode($str));
+        }
+        //是否更换头像
+        if($data['avatar']){
+            //查看用户是否已经有头像，有的话先删除服务器原来的图片
+            $data['avatar']  =   substr($data['avatar'], strpos($data['avatar'], ",")+1);
+            if(!is_base64_encoded($data['avatar'])){
+                $str = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '传过来的头像不是约定的编码'
+                );
+                exit(json_encode($str));
+            }  
+            $data['avatar'] = base64_decode(str_replace(" ","+",$data['avatar']));
+            $oldimg = $model->field("avatar")->where(array("id" => $user_id))->find();
+            if($data['avatar'] && $oldimg['avatar']){
+               //数据库中存在头像且传入了新图片，先删除服务器上的图片
+                if($oldimg['avatar'] !== $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg'){ 
+                    @unlink($oldimg['avatar']);
+                }
+                //把图片放在服务器上
+                $time = date("Y-m", time());
+                $imgpath = $_SERVER['DOCUMENT_ROOT'].'/'."Public/Uploads/".$time.'/';
+                if(!is_dir($imgpath)){
+                    if(!mkdir($imgpath,0777,true))
+                    {         
+                        echo "无法创建该路径";
+                    }
+                }
+                //将图片存到服务器上
+                $imgname = time();
+                file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
+                //将新的图片路径放到数据库中
+                $data['avatar'] = $imgpath.$imgname.".jpg";
+
+            }else if($data['avatar'] && !$oldimg['avatar']){
+                //传入新图片，但数据库中还没有图片，把传入的图片解码
+
+                //把图片放在服务器上
+                $time = date("Y-m", time());
+                $imgpath = $_SERVER['DOCUMENT_ROOT'].'/'."Public/Uploads/".$time.'/';
+                if(!is_dir($imgpath)){
+                    if(!mkdir($imgpath,0777,true))
+                    {         
+                        echo "无法创建该路径";
+                    }
+                }
+                //将图片存到服务器上
+                $imgname = time();
+                file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
+                //将新的图片路径放到数据库中
+                $data['avatar'] = $imgpath.$imgname.".jpg";   
+
+            }else if(!$data['avatar'] && !$oldimg['avatar']){
+                //没传图片，数据库也没有图片，给一个默认的图片
+                $data['avatar'] = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/avatar/img.jpg';
+            }
+            $arr[avatar] = $data['avatar'];
+            $res = $model->where(array('id'=>$user_id))->setField($arr);
+            if($res){
+                $Str = array(
+                    'code'  =>  '200',
+                    'msg'   =>  '头像更新成功'
+                );
+                exit(json_encode($Str));
+            }
         }
     }
     
