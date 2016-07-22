@@ -47,7 +47,8 @@ class TrendsController extends Controller{
         }
         //是否定位
         $address = $data['address']?$data['address']:'';
-        
+        //发表时间
+        $data['add_time'] = time();
         $res = $circle->where(array('user_id'=>$user_id))->add($data);
         if($res){
             $str = array(
@@ -66,6 +67,11 @@ class TrendsController extends Controller{
     
     //动态列表
     public function lst(){
+        
+        //根据权限查看动态
+        $data = I('post.');
+        $data['user_id'] = $data['user_id']?$data['user_id']:exit('用户id必填');
+        
         
         
     }
