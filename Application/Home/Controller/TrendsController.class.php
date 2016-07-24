@@ -147,12 +147,11 @@ class TrendsController extends Controller{
                 $str1 =  array(
                     'code'  =>  201,
                     'data'  =>  $info,
-                    'msg'   =>  '用户评论内容列表查询--失败'
+                    'msg'   =>  '该动态暂时没有评论'
                 );
                 echo json_encode($str1);
             }
         }
-         
         
         //他人评论动态
         if($data['flag'] == 1){
