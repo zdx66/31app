@@ -88,7 +88,7 @@ class TrendsController extends Controller{
                 'data'  =>  $TrendInfo,
                 'msg'   =>  '操作成功'
             );
-            echo json_encode($str);
+            //echo json_encode($str);
         }
         //用户被赞
         if($data['zan'] == 1){
