@@ -121,14 +121,17 @@ class TrendsController extends Controller{
         
         //查询评论者是否是注册会员
         $user = D('user');
-        $info = $user->field('')->where(array('id'=>$arr['other_id']))->find();
-        if(!$info){
-            $str0 = array(
-                'code'  =>  '201',
-                'msg'   =>  '该用户非注册会员，不能进行评论'
-            );
-            exit(json_encode($str0));
+        if($arr['other_id']){
+            $info = $user->field('')->where(array('id'=>$arr['other_id']))->find();
+            if(!$info){
+                $str0 = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '该用户非注册会员，不能进行评论'
+                );
+                exit(json_encode($str0));
+            }
         }
+        
             
         //查询用户动态的所有评论
         $info = $discuss->field("*")->where(array('user_id'=>$arr['user_id'],'circle_id'=>$arr['circle_id']))->select();
