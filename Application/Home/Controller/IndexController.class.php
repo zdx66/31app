@@ -192,13 +192,13 @@ class IndexController extends RestController
         //地区
         $area = D('address');
         $areaInfo = $area->field('id,addrname,pid')->where('')->select();
-        $username = $data['username'];
+        $username = $data['cellphone'];
         $str = array(
             'userinfo'  =>  $info,
             'label_list'     =>  $labelinfo,
             'area_list'      =>  $labelinfo
         );
-        //echo json_encode($str);
+        echo json_encode($str);
         
         //检查用户是否存在
         if(!$usermodel->where(array("id"=>$user_id))->find())
@@ -253,7 +253,7 @@ class IndexController extends RestController
             }
         }
         
-        //判断是否更改更改用户头像或更改用户档案照
+        //判断是否更改用户头像或更改用户档案照
         $da[0]['file_1'] = isset($data['file_1'])?$data['file_1']:'';
         $da[0]['file_2'] = isset($data['file_2'])?$data['file_2']:'';
         $da[0]['file_3'] = isset($data['file_3'])?$data['file_3']:'';
@@ -513,7 +513,7 @@ class IndexController extends RestController
      */
     public function hx_user_info()
     {
-        $username = I("get.username");
+        $username = I("get.cellphone");
         if(!$username)
         {
             $data = array(
@@ -528,7 +528,7 @@ class IndexController extends RestController
                 ->join("__USER_DATA__ AS data on user.id = data.user_id")
                 ->join("__USER_PROFILE__ AS pro on user.id = pro.user_id")
                 ->field("*")
-                ->where(array("username" => $username))
+                ->where(array("cellphone" => $username))
                 ->find();
         //标签
         $label = D("label");
