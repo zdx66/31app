@@ -653,14 +653,14 @@ class IndexController extends RestController
             exit(json_encode($data));
         }
         $usr = D('user');
-        $user = $usr->field('password_hash')->where(array('username' => $username))->find();
+        $user = $usr->field('password_hash')->where(array('cellphone' => $username))->find();
         if(!$user){
             $data = array('msg'=>'该用户不存在，重置失败');
             exit(json_encode($data));
         }
         $data['update_at'] = time();
         //重置数据库密码
-        $result = $usr->where(array(' username ' => $username,'status'=>10))->setField($data);
+        $result = $usr->where(array(' cellphone ' => $username,'status'=>10))->setField($data);
         //重置环信密码
         $token = $this->Index();
         if($result){
