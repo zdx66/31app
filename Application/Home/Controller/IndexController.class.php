@@ -49,8 +49,9 @@ class IndexController extends RestController
             exit(json_encode($str));
         }
         //限制年龄到18岁以上
-        $birthdate = time()-strtotime($birthdate); echo $birthdate;
-        $userage =  number_format($birthdate/(3600*24*365),1);
+        $birthdate2 = time()-strtotime($birthdate); 
+        $userage =  number_format($birthdate2/(3600*24*365),1);
+        
         if($userage<18){
             $str = array(
                 'code'  =>  '201',
@@ -59,7 +60,7 @@ class IndexController extends RestController
             );
             exit(json_encode($str));
         }
-
+        $birthdate = date('Y-m-d',$birthdate);echo $birthdate;
         //上传用户头像/档案照
         if($avatar){
             $avatar = base64_decode_img($avatar);
