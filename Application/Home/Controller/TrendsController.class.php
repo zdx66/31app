@@ -93,6 +93,7 @@ class TrendsController extends Controller{
         //用户被赞
         if($data['zan'] == 1){
             $res1 = $circle->where(array('id'=>$data['id']))->setInc('zan');
+            echo $circle->getLastSql();
             if($res1)
             {
                 echo '点赞成功';
