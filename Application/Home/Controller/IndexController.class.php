@@ -318,10 +318,8 @@ class IndexController extends RestController
                     file_put_contents($allPath.$v.'.jpg', $k,FILE_USE_INCLUDE_PATH);
                     $data[$v] = $allPath.$v.'.jpg';
                 }
-            }
-            
+            }  
         }
-        
 
         //数据更改的时间
         $time = time();
@@ -330,11 +328,19 @@ class IndexController extends RestController
         unset($data['avatar']);
         unset($data['user_id']);
         //更新用户信息
+        //如果更新file_1图片，将file_1的状态改成0，表示未审查成功
+        if($data['file_1']){
+            $data['file_1_status'] = 0;
+        }
         $result = $user_profile_model
                 ->where(array("user_id"=>$user_id))
                 ->setfield($data);
+        //如果更新头像，需要把头像验证状态改成0，表示未审查成功
+        if($data2['avatar']){
+            $data2['avatar_status'] =0;
+        }
         $result2 = $usermodel->where(array("id"=>$user_id))->setField($data2);
-        //echo $usermodel->getLastSql();
+
         if($result&&$result2)
         {
             $data['username'] = $username;
@@ -385,69 +391,6 @@ class IndexController extends RestController
         );
         exit(json_encode($str));
     }
-    
-    /**
-     * 更新用户扩展信息接口
-     
-    function user_profile_info()
-    {
-        $user_profile_model = D("UserProfile");
-        $data = I("post.");
-        $user_id = $data['user_id'];
-        unset($data['user_id']);
-        //判断并处理传过来的档案照
-
-        $da[0]['file_1'] = isset($data['file_1'])?$data['file_1']:'';
-        $da[0]['file_2'] = isset($data['file_2'])?$data['file_2']:'';
-        $da[0]['file_3'] = isset($data['file_3'])?$data['file_3']:'';
-        $da[0]['file_4'] = isset($data['file_4'])?$data['file_4']:'';
-        $da[0]['file_5'] = isset($data['file_5'])?$data['file_5']:'';
-        foreach ($da[0] as $v=>$k){
-            if($data[$v]){
-                $data[$v] = base64_decode_img($data[$v]);
-                $arr[$v] = $v;
-            }           
-        }
-        //删除旧图片
-        $oldimg_1 = $user_profile_model->field($arr)->where(array("user_id" => $user_id))->find();
-        foreach($oldimg_1 as $v)
-        {
-            @unlink($v);
-        }
-        //将图片存放到服务器上
-        $time = date("Y-m",time());
-        $imgpath_1 = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/'.$time.'/';
-        if(!is_dir($imgpath_1)){
-            if(!mkdir($imgpath_1,0777,true))
-            {         
-                echo "无法创建该路径";
-            }
-        }  
-        foreach($data as $v=>$k)
-        {
-            $allPath = $imgpath_1.$user_id.'_'.rand(0, 20).'_';
-            file_put_contents($allPath.$v.'.jpg', $k,FILE_USE_INCLUDE_PATH);
-            $data[$v] = $allPath.$v.'.jpg';
-        }
-        $res = $user_profile_model->where(array("user_id"=>$user_id))->setField($data);
-        if(!$res)
-        {
-            $str = array(
-                'data'  =>  $data,
-                'code'  =>   '201',
-                'msg'   =>   '操作失败'
-            );
-            exit(json_encode($str));
-        }
-        
-        $data['user_id'] = $user_id;
-        $str = array(
-            'data'  =>  $data,
-            'code'  =>  '200',
-            'msg'   =>  '操作成功'
-        );
-        exit(json_encode($str));
-    }*/
       
     /*
      * 给IM用户的添加好友 $owner_username, $friend_username
