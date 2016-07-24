@@ -596,7 +596,7 @@ class IndexController extends RestController
             exit(json_encode($data));
         }
         $user = D("user");
-        $data = array("username"=>$username,"password_hash"=>md5(md5($oldpassword)));
+        $data = array("cellphone"=>$username,"password_hash"=>md5(md5($oldpassword)));
         $result = $user->where($data)->find();
         if(!$result)
         {
@@ -611,7 +611,7 @@ class IndexController extends RestController
             "password_hash"     =>  md5(md5($newpassword)),
             "update_at"         =>  $time
         );
-        $res = $user->where(array("username"=>$username))->setField($data);
+        $res = $user->where(array("cellphone"=>$username))->setField($data);
         if($res)
         {
             $data = array(
