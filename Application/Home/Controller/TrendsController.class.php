@@ -134,22 +134,25 @@ class TrendsController extends Controller{
         
             
         //查询用户动态的所有评论
-        $info = $discuss->field("*")->where(array('user_id'=>$arr['user_id'],'circle_id'=>$arr['circle_id']))->select();
-        if($info){
-            $str1 =  array(
-                'code'  =>  200,
-                'data'  =>  $info,
-                'msg'   =>  '用户评论内容列表查询---成功'
-            );
-            echo json_encode($str1);
-        }else{
-            $str1 =  array(
-                'code'  =>  201,
-                'data'  =>  $info,
-                'msg'   =>  '用户评论内容列表查询--失败'
-            );
-            echo json_encode($str1);
-        } 
+        if($arr['user_id'] && $arr['circle_id']){
+            $info = $discuss->field("*")->where(array('user_id'=>$arr['user_id'],'circle_id'=>$arr['circle_id']))->select();
+            if($info){
+                $str1 =  array(
+                    'code'  =>  200,
+                    'data'  =>  $info,
+                    'msg'   =>  '用户评论内容列表查询---成功'
+                );
+                echo json_encode($str1);
+            }else{
+                $str1 =  array(
+                    'code'  =>  201,
+                    'data'  =>  $info,
+                    'msg'   =>  '用户评论内容列表查询--失败'
+                );
+                echo json_encode($str1);
+            }
+        }
+         
         
         //他人评论动态
         if($data['flag'] == 1){
