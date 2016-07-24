@@ -68,11 +68,44 @@ class TrendsController extends Controller{
     //动态列表
     public function lst(){
         
-        //根据权限查看动态
+        //根据权限查看动态(未实现)
         $data = I('post.');
         $data['user_id'] = $data['user_id']?$data['user_id']:exit('用户id必填');
+        //$user = D('user');
+        $circle = D('circle');
+        $TrendInfo = $circle
+                ->alias('cir')
+                ->join('left join __USER__ as user on(cir.user_id = user.id)')
+                ->join('left join __DISCUSS__ as dis on(cir.user_id = dis.user_id)')
+                ->field('cir.id,avatar,nickname,words,img1,img2,img3,img4,img5,img6,img7,img8,img9,zan,othersay,saytime,theme,other_id,reply_num')
+                ->where(array())
+                ->order('add_time desc ')
+                ->select();
+        if($TrendInfo){
+            $str = array(
+                'code'  =>  '200',
+                'data'  =>  $TrendInfo,
+                'msg'   =>  '操作成功'
+            );
+            echo json_encode($str);
+        }
+        //用户被赞
+        if($data['zan'] == 1){
+            $res1 = $circle->where(array('id'=>$data['id']))->setInc('zan');
+            if($res1)
+            {
+                echo '点赞成功';
+            }
+        }
         
-        
+        //动态被评论时，reply_num+1
+        if($data['flag'] == 1)
+        {
+            $res2 = $circle->where(array('id'=>$data['id']))->setInc('reply_num');
+            if($res2){
+                echo '评论数成功加1';
+            }
+        }
         
     }
 }
