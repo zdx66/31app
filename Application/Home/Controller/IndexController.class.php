@@ -23,14 +23,14 @@ class IndexController extends RestController
      */
     function hx_register()
     {  
-        $username = I('post.username');
+        $username = I('post.cellphone');
         $pwd = I('post.password');
         $password = md5(md5($pwd));
         $nickname = I('post.nickname');
         $sex = I('post.sex');
         $birthdate = I('post.birthdate');
-        $file_1 = I('post.file_1');
-        if($username == null || $pwd ==null || $nickname == null || $sex == null || $birthdate == null || $file_1 == null){
+        $avatar = I('post.avatar');
+        if($username == null || $pwd ==null || $nickname == null || $sex == null || $birthdate == null || $avatar == null){
             $data= array('msg'=>'所填各项都不能为空，请重新输入');
             exit(json_encode($data));
         }
@@ -38,6 +38,15 @@ class IndexController extends RestController
             $sex = 'male';
         }elseif($sex == 2){
             $sex = 'female';
+        }
+        //判断手机号是否合法
+        if(!is_cellphone($username)){
+            $str = array(
+                'code'  =>  '201',
+                'cellphone' =>  $username,
+                'msg'   =>  '该手机号不合法'
+            );
+            exit(json_encode($str));
         }
         //限制年龄到18岁以上
         $birthdate = time()-strtotime($birthdate);
@@ -52,8 +61,8 @@ class IndexController extends RestController
         }
 
         //上传用户头像/档案照
-        if($file_1){
-            $file_1 = base64_decode_img($file_1);
+        if($avatar){
+            $avatar = base64_decode_img($avatar);
         }
         //组装图片存储路径
         $time = date("Y-m",time());
@@ -65,30 +74,33 @@ class IndexController extends RestController
             }
         }  
         $imgname = time();
-        file_put_contents ($imgpath.$imgname.".jpg", $data['avatar'], FILE_USE_INCLUDE_PATH);
+        file_put_contents ($imgpath.$imgname.".jpg", $avatar, FILE_USE_INCLUDE_PATH);
         //将新的图片路径放到数据库中
-        $file_1 = $imgpath.$imgname.".jpg";
-        $avatar = $file_1;
+        $avatar = $imgpath.$imgname.".jpg";
+        $file_1 = $avatar;
         $user = D('User'); 
         $userData = D('UserData');
         $userProfile = D('UserProfile');
-        $res = $user->field('id')->where(array('username '=>$username))->find();
+        $res = $user->field('id')->where(array('cellphone '=>$username))->find();
         if($res){
             $result = array(   
             'code' => '201',   
-            'msg' => '用户名已存在',   
+            'msg' => '该手机号已注册',   
             'data' =>$username  
                 ); 
             exit(json_encode($result));
         }
         $t = time();
-        $id = $user->add(array('username'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'sex'=>$sex,'avatar'=>$avatar,'created_at'=>$t,'status'=>10));
+        $id = $user->add(array('cellphone'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'sex'=>$sex,'avatar'=>$avatar,'created_at'=>$t,'status'=>10));
         $usr = $userData->add(array('user_id'=>$id));
         $usrp = $userProfile->add(array('user_id'=>$id,'birthdate'=>$birthdate,'file_1'=>$file_1));
         //环信
         $url = C('URL') . "/users";
         $token = $this->Index();
         if($id && $usr && $usrp){ 
+            $user->commit();
+            $userData->commit();
+            $userProfile->commit();
             $data = array(
                 'username' => $username,
                 'password' => $password,
@@ -100,6 +112,9 @@ class IndexController extends RestController
                 'Authorization: Bearer ' . $token
             );
         }else{
+            $user->rollback();
+            $userData->rollback();
+            $userProfile->rollback();
             $data = array(
                 'code'      => '201',
                 'msg'       => '注册失败'
@@ -136,7 +151,7 @@ class IndexController extends RestController
         $data = array('nickname'=>$nickname,'update_at'=>$time);
         $user = D('user');
         //更改数据库昵称
-        $result = $user->where(array('username'=>$username))->setField($data);
+        $result = $user->where(array('cellphone'=>$username))->setField($data);
         $url = C('URL') . "/users/${username}";
         $token = $this->Index();
         $header = array(
