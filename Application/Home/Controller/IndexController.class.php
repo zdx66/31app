@@ -260,44 +260,68 @@ class IndexController extends RestController
         $da[0]['file_4'] = isset($data['file_4'])?$data['file_4']:'';
         $da[0]['file_5'] = isset($data['file_5'])?$data['file_5']:'';
         $da[0]['avatar'] = isset($data['avatar'])?$data['avatar']:'';
-        foreach ($da[0] as $v=>$k){
-            if($data[$v]){
+        //如果要删除档案照（ps:头像和file_1不能删除）
+        if($data['flag'] == 2){
+            if($da[0]['file_1'] || $da[0]['avatar']){
+                $str = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '头像或file_1档案照不能删除'
+                );
+                echo json_encode($str);
+            }else{
+                //删除照片
+                foreach($da[0] as $k->$v){
+                    $arr[$k] = @unlink($v);
+                }
+                $str = array(
+                    'code'  =>  '200',
+                    'arr'   =>  $arr,
+                    'msg'   =>  '照片删除成功'
+                );
+                echo json_encode($str);
+            }
+        }else{
+            //修改照片：包括头像和档案照
+            foreach ($da[0] as $v=>$k){
+                if($data[$v]){
                 $data[$v] = base64_decode_img($data[$v]);
                 $arr[$v] = $v;
-            }           
-        }
-        //如果传过来了头像
-        //删除旧图片
-        $user_profile_model = D('UserProfile');
-        $oldimg_1 = $user_profile_model
-                ->alias("pro")
-                ->join('left join __USER__ as user on (user.id=pro.user_id)')
-                ->field($arr)
-                ->where(array("user_id" => $user_id))
-                ->find();
-        foreach($oldimg_1 as $v)
-        {
-            @unlink($v);
+                }           
+            }
+            //删除服务器上的旧档案图片或头像
+            $user_profile_model = D('UserProfile');
+            $oldimg_1 = $user_profile_model
+                    ->alias("pro")
+                    ->join('left join __USER__ as user on (user.id=pro.user_id)')
+                    ->field($arr)
+                    ->where(array("user_id" => $user_id))
+                    ->find();
+            foreach($oldimg_1 as $v)
+            {
+                @unlink($v);
+            }
+
+            //将图片存放到服务器上
+            $t = date("Y-m",time());
+            $imgpath_1 = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/'.$t.'/';
+            if(!is_dir($imgpath_1)){
+                if(!mkdir($imgpath_1,0777,true))
+                {         
+                    echo "无法创建该路径";
+                }
+            }  
+
+            foreach($arr as $v=>$k)
+            {
+                if($v){
+                    $allPath = $imgpath_1.$user_id.'_'.rand(0, 20).'_';
+                    file_put_contents($allPath.$v.'.jpg', $k,FILE_USE_INCLUDE_PATH);
+                    $data[$v] = $allPath.$v.'.jpg';
+                }
+            }
+            
         }
         
-        //将图片存放到服务器上
-        $t = date("Y-m",time());
-        $imgpath_1 = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/'.$t.'/';
-        if(!is_dir($imgpath_1)){
-            if(!mkdir($imgpath_1,0777,true))
-            {         
-                echo "无法创建该路径";
-            }
-        }  
-
-        foreach($arr as $v=>$k)
-        {
-            if($v){
-                $allPath = $imgpath_1.$user_id.'_'.rand(0, 20).'_';
-                file_put_contents($allPath.$v.'.jpg', $k,FILE_USE_INCLUDE_PATH);
-                $data[$v] = $allPath.$v.'.jpg';
-            }
-        }
 
         //数据更改的时间
         $time = time();
