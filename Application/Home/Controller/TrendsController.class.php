@@ -70,6 +70,7 @@ class TrendsController extends Controller{
         
         //根据权限查看动态(未实现)
         $data = I('post.');
+        dump($data);
         $data['user_id'] = $data['user_id']?$data['user_id']:exit('用户id必填');
         //$user = D('user');
         $circle = D('circle');
