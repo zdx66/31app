@@ -196,7 +196,7 @@ class IndexController extends RestController
         $str = array(
             'userinfo'  =>  $info,
             'label_list'     =>  $labelinfo,
-            'area_list'      =>  $labelinfo
+            'area_list'      =>  $areaInfo
         );
         echo json_encode($str);
         
