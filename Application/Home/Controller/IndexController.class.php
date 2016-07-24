@@ -60,7 +60,7 @@ class IndexController extends RestController
             );
             exit(json_encode($str));
         }
-        $birthdate = date('Y-m-d',$birthdate);echo $birthdate;
+        $birthdate = date('Y-m-d',$birthdate);
         //上传用户头像/档案照
         if($avatar){
             $avatar = base64_decode_img($avatar);
