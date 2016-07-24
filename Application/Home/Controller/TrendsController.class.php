@@ -70,9 +70,7 @@ class TrendsController extends Controller{
         
         //根据权限查看动态(未实现)
         $data = I('post.');
-        dump($data);
-        $data['user_id'] = $data['user_id']?$data['user_id']:exit('用户id必填');
-        //$user = D('user');
+        $data['user_id'] = $data['user_id']?$data['user_id']:exit('用户user_id必填');
         $circle = D('circle');
         $TrendInfo = $circle
                 ->alias('cir')
@@ -106,6 +104,89 @@ class TrendsController extends Controller{
             $res2 = $circle->where(array('id'=>$data['id']))->setInc('reply_num');
             if($res2){
                 echo '评论数成功加1';
+            }
+        }  
+    }
+    
+    //评论用户动态
+    public function reply(){
+        
+        $data = I('post.');
+        $arr['user_id'] = $data['user_id'];
+        $arr['circle_id'] = $data['circle_id'];
+        $arr['other_id'] = $data['other_id'];
+        $arr['othersay'] = $data['othersay'];
+        $arr['saytime'] = time();
+        $discuss = D('discuss');
+        
+        //查询评论者是否是注册会员
+        $user = D('user');
+        $info = $user->field('')->where(array('id'=>$arr['other_id']))->find();
+        if(!$info){
+            $str0 = array(
+                'code'  =>  '201',
+                'msg'   =>  '该用户非注册会员，不能进行评论'
+            );
+            exit(json_encode($str0));
+        }
+            
+        //查询用户动态的所有评论
+        $info = $discuss->field("*")->where(array('user_id'=>$arr['user_id'],'circle_id'=>$arr['circle_id']))->select();
+        if($info){
+            $str1 =  array(
+                'code'  =>  200,
+                'data'  =>  $info,
+                'msg'   =>  '用户评论内容列表查询---成功'
+            );
+            echo json_encode($str1);
+        }else{
+            $str1 =  array(
+                'code'  =>  201,
+                'data'  =>  $info,
+                'msg'   =>  '用户评论内容列表查询--失败'
+            );
+            echo json_encode($str1);
+        } 
+        
+        //他人评论动态
+        if($data['flag'] == 1){
+            $res = $discuss->where(array())->add($arr);
+            if($res){
+                $str2 = array(
+                    'code'  =>  '200',
+                    'data'  =>  $arr,
+                    'msg'   =>  '评论成功'
+                );
+                echo json_encode($str2);
+            }else{
+                $str2 = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '评论失败'
+                );
+                echo(json_encode($str2));
+            }
+        }
+  
+        //当用户回复评论时
+        $id = $data['id'];  //  评论的id编号
+        $arr2['reply'] = $data['reply'];
+        $arr2['reply_time'] = time();
+        if($data['flag'] == 2){
+            $res2 = $discuss->where(array('id'=>$id))->setField($arr2);
+            if($res2){
+                $str3 = array(
+                    'code'  =>  200,
+                    'data'  =>  $arr2,
+                    'msg'   =>  '用户回复评论成功'
+                );
+                echo json_encode($str3);
+            }else{
+                $str3 = array(
+                    'code'  =>  201,
+                    'data'  =>  $arr2,
+                    'msg'   =>  '用户回复评论失败'
+                );
+                echo json_encode($str3);
             }
         }
         
