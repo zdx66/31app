@@ -49,7 +49,7 @@ class IndexController extends RestController
             exit(json_encode($str));
         }
         //限制年龄到18岁以上
-        $birthdate = time()-strtotime($birthdate);
+        $birthdate = time()-strtotime($birthdate); echo $birthdate;
         $userage =  number_format($birthdate/(3600*24*365),1);
         if($userage<18){
             $str = array(
