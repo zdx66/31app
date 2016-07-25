@@ -81,7 +81,7 @@ class TrendsController extends Controller{
         }
         
         //动态被评论时，reply_num+1
-       
+        /*
         if($data['flag'] == 1)
         {
             $res2 = $circle->where(array('id'=>$data['id']))->setInc('reply_num');
@@ -90,7 +90,7 @@ class TrendsController extends Controller{
             }else{
                 $reply = '没有新增评论';
             }
-        } 
+        } */
         
         $TrendInfo = $circle
                 ->distinct(TRUE)
@@ -109,11 +109,9 @@ class TrendsController extends Controller{
                 'data'  =>  $TrendInfo,
                 'msg'   =>  '操作成功',
                 'zan'   =>  $zan,
-                'reply_num' =>  $reply
             );
             echo json_encode($str);
         }
-         
     }
     
     //评论用户动态
@@ -164,10 +162,19 @@ class TrendsController extends Controller{
         if($data['flag'] == 1){
             $res = $discuss->where(array())->add($arr);
             if($res){
+                //评论数加1
+                $circle = D('circle');
+                $addreply = $circle->where(array('user_id'=>$data['user_id'],'id'=>$data['circle_id']))->setInc("reply_num");
+                if($addreply){
+                    $addreply = '评论数加1成功';
+                }else{
+                    $addreply = '评论数加1失败';
+                }
                 $str2 = array(
                     'code'  =>  '200',
                     'data'  =>  $arr,
-                    'msg'   =>  '评论成功'
+                    'msg'   =>  '评论成功',
+                    'addreply'  =>  $addreply
                 );
                 echo json_encode($str2);
             }else{
