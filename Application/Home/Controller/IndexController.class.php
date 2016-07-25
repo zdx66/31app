@@ -449,7 +449,7 @@ class IndexController extends RestController
      */
     public function hx_contacts_delete()
     {
-        $data = I('post.');dump($data);
+        $data = I('post.');
         $owner_username = $data['owname'];
         $friend_username = $data['fname'];
         $friend = D('friends');
@@ -469,7 +469,6 @@ class IndexController extends RestController
         }
         echo json_encode($str);
         $url = C('URL')  . "/users/${owner_username}/contacts/users/${friend_username}";
-        echo $url;
         $token = $this->Index();
         $header = array(
             'Authorization: Bearer ' . $token
