@@ -9,7 +9,7 @@ class TrendsController extends Controller{
         $circle = D('circle');
         $data = I('post.');
         $user_id = $data['user_id']?$data['user_id']:exit('用户编号没传过来');
-        $words = $data['words']?$data['words']:exit('用户没有发表任何东西，发表动态失败');
+        $data['words'] = $data['words']?$data['words']:exit('用户没有发表任何东西，发表动态失败');
         $arr[0]['img1'] =$data['img1']?$data['img1']:'';
         $arr[0]['img2'] =$data['img2']?$data['img2']:'';
         $arr[0]['img3'] =$data['img3']?$data['img3']:'';
@@ -26,11 +26,8 @@ class TrendsController extends Controller{
                 $data3[$v] = $v;
             }
         }
-        //如果图片不空,删除图片
-        $oldImg = $circle->field($data3)->where(array('user_id'=>$user_id))->find();
-        foreach ($oldImg as $v){;
-            //@unlink($v);
-        }
+
+        //如果上传了图片
         if(!empty($data2)){
             $date = date('Y-m-d',time());
             $imgpath = $_SERVER['DOCUMENT_ROOT'].'/Public/Uploads/'.$date.'/';
@@ -46,7 +43,7 @@ class TrendsController extends Controller{
             }
         }
         //是否定位
-        $address = $data['address']?$data['address']:'';
+        $data['address'] = $data['address']?$data['address']:'';
         //发表时间
         $data['add_time'] = time();
         $res = $circle->where(array('user_id'=>$user_id))->add($data);
@@ -71,41 +68,48 @@ class TrendsController extends Controller{
         //根据权限查看动态(未实现)
         $data = I('post.');
         $data['user_id'] = $data['user_id']?$data['user_id']:exit('用户user_id必填');
+        $page = $data['page']?$data['page']:1;
         $circle = D('circle');
-        $TrendInfo = $circle
-                ->alias('cir')
-                ->join('left join __USER__ as user on(cir.user_id = user.id)')
-                ->join('left join __DISCUSS__ as dis on(cir.user_id = dis.user_id)')
-                ->field('cir.id,avatar,nickname,words,img1,img2,img3,img4,img5,img6,img7,img8,img9,zan,othersay,saytime,theme,other_id,reply_num')
-                ->where(array())
-                ->order('add_time desc ')
-                ->select();
-        if($TrendInfo){
-            $str = array(
-                'code'  =>  '200',
-                'data'  =>  $TrendInfo,
-                'msg'   =>  '操作成功'
-            );
-            //echo json_encode($str);
-        }
         //用户被赞
         if($data['zan'] == 1){
             $res1 = $circle->where(array('id'=>$data['id']))->setInc('zan');
-            echo $circle->getLastSql();
-            if($res1)
-            {
-                echo '点赞成功';
+            if($res1){
+                $zan = '点赞成功';
             }
         }
         
         //动态被评论时，reply_num+1
+       
         if($data['flag'] == 1)
         {
             $res2 = $circle->where(array('id'=>$data['id']))->setInc('reply_num');
             if($res2){
-                echo '评论数成功加1';
+                $reply = '评论数成功加1';
             }
-        }  
+        } 
+        
+        $TrendInfo = $circle
+                ->distinct(TRUE)
+                ->alias('cir')
+                ->join('left join __USER__ as user on(cir.user_id = user.id)')
+                ->field('cir.id,avatar,nickname,words,img1,img2,img3,img4,img5,img6,img7,img8,img9,zan,theme,auth,address,reply_num')
+                ->where(array())
+                ->order('add_time desc ')
+                ->group('cir.id')
+                ->page($page,10)
+                ->select();
+
+        if($TrendInfo){
+            $str = array(
+                'code'  =>  '200',
+                'data'  =>  $TrendInfo,
+                'msg'   =>  '操作成功',
+                'zan'   =>  $zan,
+                'reply_num' =>  $reply
+            );
+            echo json_encode($str);
+        }
+         
     }
     
     //评论用户动态
@@ -131,7 +135,6 @@ class TrendsController extends Controller{
                 exit(json_encode($str0));
             }
         }
-        
             
         //查询用户动态的所有评论
         if($arr['user_id'] && $arr['circle_id']){
@@ -194,6 +197,16 @@ class TrendsController extends Controller{
                 echo json_encode($str3);
             }
         }
+        
+    }
+    
+    //用户查看自己的所有动态
+    public function self_lst(){
+        
+    }
+    
+    //用户删除发表的动态
+    public function del_record(){
         
     }
 }
