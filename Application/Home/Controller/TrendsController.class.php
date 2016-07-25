@@ -80,18 +80,6 @@ class TrendsController extends Controller{
             }
         }
         
-        //动态被评论时，reply_num+1
-        /*
-        if($data['flag'] == 1)
-        {
-            $res2 = $circle->where(array('id'=>$data['id']))->setInc('reply_num');
-            if($res2){
-                $reply = '评论数成功加1';
-            }else{
-                $reply = '没有新增评论';
-            }
-        } */
-        
         $TrendInfo = $circle
                 ->distinct(TRUE)
                 ->alias('cir')
@@ -135,26 +123,6 @@ class TrendsController extends Controller{
                     'msg'   =>  '该用户非注册会员，不能进行评论'
                 );
                 exit(json_encode($str0));
-            }
-        }
-            
-        //查询用户动态的所有评论
-        if($arr['user_id'] && $arr['circle_id']){
-            $info = $discuss->field("*")->where(array('user_id'=>$arr['user_id'],'circle_id'=>$arr['circle_id']))->select();
-            if($info){
-                $str1 =  array(
-                    'code'  =>  200,
-                    'data'  =>  $info,
-                    'msg'   =>  '用户评论内容列表查询---成功'
-                );
-                echo json_encode($str1);
-            }else{
-                $str1 =  array(
-                    'code'  =>  201,
-                    'data'  =>  $info,
-                    'msg'   =>  '该动态暂时没有评论'
-                );
-                echo json_encode($str1);
             }
         }
         
@@ -209,15 +177,86 @@ class TrendsController extends Controller{
             }
         }
         
-    }
-    
-    //用户查看自己的所有动态
-    public function self_lst(){
+        //查询用户动态的所有评论
+        if($arr['user_id'] && $arr['circle_id']){
+            $info = $discuss->field("*")->where(array('user_id'=>$arr['user_id'],'circle_id'=>$arr['circle_id']))->select();
+            if($info){
+                $str1 =  array(
+                    'code'  =>  200,
+                    'data'  =>  $info,
+                    'msg'   =>  '用户评论内容列表查询---成功'
+                );
+                echo json_encode($str1);
+            }else{
+                $str1 =  array(
+                    'code'  =>  201,
+                    'data'  =>  $info,
+                    'msg'   =>  '该动态暂时没有评论'
+                );
+                echo json_encode($str1);
+            }
+        }
         
     }
     
+    //用户查看自己的所有动态或某条动态/动态详情
+    public function self_lst(){
+        
+        $data = I('post.');
+        $user_id = $data['user_id'];
+        $page = $data['page']?$data['page']:1;
+        $flag = $data['flag'];
+        $circle = D('circle');
+        if($flag == 1){
+            $circleList = $circle->field('*')->where(array('user_id'=>$user_id))->order('add_time desc')->page($page,10)->select();
+            if($circleList){
+                $str = array(
+                    'code'  =>  200,
+                    'msg'   =>  '查询成功',
+                    'data'  =>  $circleList
+                );
+            }else{
+                $str = array(
+                    'code'  =>  201,
+                    'msg'   =>  '查询失败,该用户没有发表任何动态',
+                );  
+            }
+            echo json_encode($str);
+        }elseif ($flag == 2) {
+            $data['circle_id'] = $data['circle_id']?$data['circle_id']:'';
+            if(!$data['circle_id']){
+                    exit(json_encode('动态id不能为空'));
+            }
+            $circleList = $circle->field('*')->where(array('id'=>$data['circle_id']))->find();
+            if(!$circleList){
+                $str = array(
+                    'code'  =>  '201',
+                    'msg'   =>  '查询失败，该记录不存在'
+                );
+            }else{
+                $str = array(
+                    'code'  =>  '200',
+                    'msg'   =>  '查询成功',
+                    'data'  =>  $circleList
+                );
+            }
+            echo json_encode($str);
+        }else{
+            exit(json_encode('没有该操作'));
+        }
+  
+    }
+    
+
     //用户删除发表的动态
     public function del_record(){
         
+        $data = I('post.');
+        $circle_id = $data['circle_id']?$data['circle_id']:'';
+        if(!$circle_id){
+            exit(json_encode('要删除的动态id不能空'));
+        }
+        $circle = D('circle');
+        $res = 
     }
 }
