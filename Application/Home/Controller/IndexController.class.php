@@ -334,11 +334,11 @@ class IndexController extends RestController
         //更新用户信息
         //如果更新file_1图片，将file_1的状态改成0，表示未审查成功
         if($data['file_1']){
-            $data['file_1_status'] = 0;
+            $data3['file_1_status'] = 0;
         }
         $result = $user_profile_model
                 ->where(array("user_id"=>$user_id))
-                ->setfield($data);
+                ->setField($data3);
         //如果更新头像，需要把头像验证状态改成0，表示未审查成功
         if($data2['avatar']){
             $data2['avatar_status'] =0;
