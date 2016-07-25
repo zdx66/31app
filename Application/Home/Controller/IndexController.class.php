@@ -91,6 +91,10 @@ class IndexController extends RestController
                 ); 
             exit(json_encode($result));
         }
+        //开启事务
+        $user->startTrans();
+        $userData->startTrans();
+        $userProfile->startTrans();
         $t = time();
         $id = $user->add(array('cellphone'=>$username,'password_hash'=>$password,'nickname'=>$nickname,'sex'=>$sex,'avatar'=>$avatar,'created_at'=>$t,'status'=>10));
         $usr = $userData->add(array('user_id'=>$id));
