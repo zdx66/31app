@@ -438,12 +438,10 @@ class IndexController extends RestController
         }
         
         $url = C('URL')  . "/users/${owner_username}/contacts/users/${friend_username}";
-        echo $url;
         $token = $this->Index();
         $header = array(
             'Authorization: Bearer ' . $token
         );
-        echo $this->curl($url, "", $header, "POST");
         return $this->curl($url, "", $header, "POST");
     }
     /*
