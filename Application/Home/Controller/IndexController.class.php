@@ -404,6 +404,8 @@ class IndexController extends RestController
         $data = I('post.');
         $owname = $data['owname'];
         $fname = $data['fname'];
+        $owner_username = $owname;
+        $friend_username = $fname;
         //查看用户是否存在
         $user = D('user');
         $res1 = $user->field('id')->where(array('cellphone'=>$owname))->find();
