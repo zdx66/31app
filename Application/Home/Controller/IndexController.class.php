@@ -401,10 +401,39 @@ class IndexController extends RestController
      */
     public function hx_contacts()
     {
-        $owname = json_decode($_POST['owner_username'],true);
-        $fname = json_decode($_POST['friend_username'],true);
-        $owner_username = $owname['owner_username'];
-        $friend_username = $fname['friend_username'];
+        $data = I('post.');
+        $owname = $data['owname'];
+        $fname = $data['fname'];
+        //查看用户是否存在
+        $user = D('user');
+        $res1 = $user->field('id')->where(array('cellphone'=>$owname))->find();
+        $res2 = $user->field('id')->where(array('cellphone'=>$fname))->find();
+        if(!$res1 || !$res2){
+            $str = array(
+                'code'  =>  201,
+                'msg'   =>  '其中一个好友不存在，匹配失败',
+                'data'  =>  $data
+            );
+            exit(json_encode($str));
+        }
+
+        $friend = D('friends');
+        $res = $friend->add($data);
+        if($res){
+            $str = array(
+                'code'  =>  200,
+                'msg'   =>  '好友匹配成功',
+                'data'  =>  $data
+            );
+            echo(json_encode($str));
+        }else{
+           $str = array(
+                'code'  =>  201,
+                'msg'   =>  '好友匹配失败',
+                'data'  =>  $data
+            ); 
+           exit(json_encode($str));
+        }
         $url = C('URL')  . "/users/${owner_username}/contacts/users/${friend_username}";
         $token = $this->Index();
         $header = array(
@@ -417,10 +446,10 @@ class IndexController extends RestController
      */
     public function hx_contacts_delete()
     {
-        $owname = json_decode($_POST['owner_username'],true);
-        $fname = json_decode($_POST['friend_username'],true);
-        $owner_username = $owname['owner_username'];
-        $friend_username = $fname['friend_username'];
+        $owname = I('post.owname');
+        $fname = I('post.fname');
+        $owner_username = $owname;
+        $friend_username = $fname;
         $url = C('URL')  . "/users/${owner_username}/contacts/users/${friend_username}";
         $token = $this->Index();
         $header = array(
@@ -433,8 +462,8 @@ class IndexController extends RestController
      */
     public function hx_contacts_user()
     {
-        $owname = json_decode($_POST['owner_username'],true);
-        $owner_username = $owname['owner_username'];
+        $owname = I('post.owname');
+        $owner_username = I('post.fname');
         $url = C('URL') . "/users/${owner_username}/contacts/users";
         $token = $this->Index();
         $header = array(
