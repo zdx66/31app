@@ -75,6 +75,8 @@ class TrendsController extends Controller{
             $res1 = $circle->where(array('id'=>$data['id']))->setInc('zan');
             if($res1){
                 $zan = '点赞成功';
+            }else{
+                $zan = '没有点赞或点赞失败';
             }
         }
         
@@ -85,6 +87,8 @@ class TrendsController extends Controller{
             $res2 = $circle->where(array('id'=>$data['id']))->setInc('reply_num');
             if($res2){
                 $reply = '评论数成功加1';
+            }else{
+                $reply = '没有新增评论';
             }
         } 
         
