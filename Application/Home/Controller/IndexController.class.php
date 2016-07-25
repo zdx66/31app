@@ -454,7 +454,6 @@ class IndexController extends RestController
         $friend_username = $data['fname'];
         $friend = D('friends');
         $res = $friend->where($data)->delete();
-        echo $friend->getLastSql();
         if($res){
             $str = array(
                 'code'  =>  200,
