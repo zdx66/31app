@@ -469,6 +469,7 @@ class IndexController extends RestController
         }
         echo json_encode($str);
         $url = C('URL')  . "/users/${owner_username}/contacts/users/${friend_username}";
+        echo $url;
         $token = $this->Index();
         $header = array(
             'Authorization: Bearer ' . $token
