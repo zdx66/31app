@@ -449,7 +449,7 @@ class IndexController extends RestController
      */
     public function hx_contacts_delete()
     {
-        $data = I('post.owname');
+        $data = I('post.owname');dump($data);
         $owner_username = $data['owname'];
         $friend_username = $data['fname'];
         $friend = D('friends');
