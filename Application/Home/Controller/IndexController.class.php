@@ -449,10 +449,25 @@ class IndexController extends RestController
      */
     public function hx_contacts_delete()
     {
-        $owname = I('post.owname');
-        $fname = I('post.fname');
-        $owner_username = $owname;
-        $friend_username = $fname;
+        $data = I('post.owname');
+        $owner_username = $data['owname'];
+        $friend_username = $data['fname'];
+        $friend = D('friends');
+        $res = $friend->delete($data);
+        if($res){
+            $str = array(
+                'code'  =>  200,
+                'msg'   =>  '好友关系解除',
+                'data'  =>  $data
+            );
+        }else{
+            $str = array(
+                'code'  =>  201,
+                'msg'   =>  '用户名写错或不存在该好友关系，好友关系解除失败',
+                'data'  =>  $data
+            );
+        }
+        echo json_encode($str);
         $url = C('URL')  . "/users/${owner_username}/contacts/users/${friend_username}";
         $token = $this->Index();
         $header = array(
@@ -466,8 +481,23 @@ class IndexController extends RestController
     public function hx_contacts_user()
     {
         $owname = I('post.owname');
-        $owner_username = I('post.fname');
-        $url = C('URL') . "/users/${owner_username}/contacts/users";
+        $friend = D('friends');
+        $flist = $friend->field('')->where(array('owname'=>$owname))->select();
+        if($flist){
+            $str = array(
+                'code'  =>  200,
+                'msg'   =>  '查询成功',
+                'data'  =>  $flist
+            );
+        }else{
+            $str = array(
+                'code'  =>  201,
+                'msg'   =>  '查询失败，该用户不存在，或者该用户没有好友',
+                'data'  =>  $flist
+            );
+        }
+        echo json_encode($str);
+        $url = C('URL') . "/users/${owname}/contacts/users";
         $token = $this->Index();
         $header = array(
             'Authorization: Bearer ' . $token
