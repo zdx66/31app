@@ -439,6 +439,7 @@ class IndexController extends RestController
         $header = array(
             'Authorization: Bearer ' . $token
         );
+        echo $this->curl($url, "", $header, "POST");
         return $this->curl($url, "", $header, "POST");
     }
     /*
